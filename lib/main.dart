@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/screens/select-user.dart';
 
@@ -14,9 +15,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         scaffoldBackgroundColor: Color(0xff002F3F),
         primaryColor: Colors.black,
-        accentColor: Colors.amber
+        accentColor: Colors.amber,
+        textTheme: GoogleFonts.ubuntuTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
-      home: DashBoard(),
+      home: SelectUser(),
     );
   }
 }

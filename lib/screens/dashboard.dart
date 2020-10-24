@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
 class DashBoard extends StatefulWidget {
@@ -8,6 +9,25 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
+  String lat = "N/A";
+  String long = "N/A";
+
+  getLocation() async {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    setState(() {
+      lat = position.latitude.toString();
+      long = position.longitude.toString();
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getLocation();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context,designSize: Size(720, 1520), allowFontScaling: false);
@@ -93,7 +113,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: '12345676',color: Colors.black,size: ScreenUtil().setSp(30),),
+                            child: CustomText(text: lat,color: Colors.black,size: ScreenUtil().setSp(30),),
                           ),
                         ),
                       ),
@@ -110,7 +130,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: '12345676',color: Colors.black,size: ScreenUtil().setSp(30),),
+                            child: CustomText(text: long,color: Colors.black,size: ScreenUtil().setSp(30),),
                           ),
                         ),
                       ),
