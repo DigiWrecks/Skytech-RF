@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "178490714672",
+    "firebase_url": "https://skytech-rf.firebaseio.com",
+    "project_id": "skytech-rf",
+    "storage_bucket": "skytech-rf.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178490714672:android:be6f45dddaba9d218d1bf5",
+        "android_client_info": {
+          "package_name": "com.digiwrecks.skytech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "178490714672-a53nusvd6ds9rmbqdc2jh9h7rtgd1s3f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCoEFE0vmY4goBOyRHqL7zFQfAOQGJTD2M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "178490714672-a53nusvd6ds9rmbqdc2jh9h7rtgd1s3f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

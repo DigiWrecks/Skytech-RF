@@ -5,6 +5,11 @@ import 'package:skytech/screens/admin/settings.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
 class AdminDashboard extends StatefulWidget {
+
+  final String name;
+
+  const AdminDashboard({Key key, this.name}) : super(key: key);
+
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
 }
@@ -38,7 +43,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'Dulaj Nadawa',size: ScreenUtil().setSp(70),align: TextAlign.start,),
+              child: CustomText(text: widget.name,size: ScreenUtil().setSp(70),align: TextAlign.start,),
             ),
             SizedBox(height: ScreenUtil().setHeight(30),),
             Padding(

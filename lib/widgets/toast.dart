@@ -16,7 +16,7 @@ class ToastBar{
         gravity: ToastGravity.BOTTOM,
         backgroundColor: color,
         textColor: Colors.white,
-        fontSize: 16.0
+        fontSize: 16.0,
     );
   }
 }
