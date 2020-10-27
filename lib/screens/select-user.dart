@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:skytech/screens/admin/admin-login.dart';
 import 'package:skytech/screens/register-device.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
@@ -49,7 +50,12 @@ class SelectUser extends StatelessWidget {
                     SizedBox(height: ScreenUtil().setHeight(100),),
                     Padding(
                       padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50)),
-                      child: Button(text: 'Admin Login',color: Colors.white,textColor: Colors.black,onclick: (){},),
+                      child: Button(text: 'Admin Login',color: Colors.white,textColor: Colors.black,onclick: (){
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(builder: (context) => AdminLogin()),
+                        );
+                      },),
                     ),
                     SizedBox(height: ScreenUtil().setHeight(50),),
                     Padding(
