@@ -46,7 +46,9 @@ class _AdminRegisterState extends State<AdminRegister> {
             'name': name.text,
             'email': email.text,
             'code': code.text,
-            'sites': []
+            'sites': [],
+            'users': [],
+            'devices': []
           });
 
           name.clear();

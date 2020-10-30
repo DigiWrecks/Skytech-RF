@@ -7,8 +7,9 @@ import 'package:skytech/widgets/custom-text.dart';
 class AdminDashboard extends StatefulWidget {
 
   final String name;
+  final String code;
 
-  const AdminDashboard({Key key, this.name}) : super(key: key);
+  const AdminDashboard({Key key, this.name, this.code}) : super(key: key);
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -23,11 +24,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
         elevation: 0,
         centerTitle: true,
         title: CustomText(text: 'Profiles'),
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(icon: Icon(Icons.settings), onPressed: (){
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (context) => Settings()),
+              CupertinoPageRoute(builder: (context) => Settings(code: widget.code,)),
             );
           })
         ],

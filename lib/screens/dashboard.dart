@@ -36,6 +36,7 @@ class _DashBoardState extends State<DashBoard> {
         elevation: 0,
         centerTitle: true,
         title: CustomText(text: 'Dashboard'),
+        automaticallyImplyLeading: false,
       ),
 
       body: SingleChildScrollView(

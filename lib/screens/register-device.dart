@@ -1,11 +1,16 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/inputfield.dart';
+import 'package:skytech/widgets/toast.dart';
 
 class RegisterDevice extends StatefulWidget {
   @override
@@ -17,6 +22,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
   TextEditingController name = TextEditingController();
   TextEditingController code = TextEditingController();
   TextEditingController email = TextEditingController();
+  TextEditingController id = TextEditingController();
   String deviceID = 'N/A';
 
   getDeviceID() async {
@@ -32,6 +38,83 @@ class _RegisterDeviceState extends State<RegisterDevice> {
       setState(() {
         deviceID = iosInfo.identifierForVendor;
       });
+    }
+  }
+
+  List userList = [];
+  List deviceList = [];
+
+  registerDevice() async {
+    await Firebase.initializeApp();
+    if(email.text!='' && id.text!='' && name.text!=''&& code.text!=''){
+      ToastBar(color: Colors.orange,text: 'Please wait...').show();
+
+      try{
+
+        var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: code.text).get();
+        var companies = sub.docs;
+
+        var sub2 = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: email.text).get();
+        var users = sub2.docs;
+
+        if(users.isEmpty){
+          if(companies.isNotEmpty){
+              userList = companies[0]['users'];
+              deviceList = companies[0]['devices'];
+              userList.add(email.text);
+              deviceList.add(deviceID);
+
+            await FirebaseFirestore.instance.collection('user').doc(email.text).set({
+              'name': name.text,
+              'email': email.text,
+              'code': code.text,
+              'id': id.text,
+              'deviceId': deviceID
+            });
+
+            await FirebaseFirestore.instance.collection('admin').doc(companies[0].id).update({
+              'users': userList,
+              'devices': deviceList
+            });
+
+            name.clear();
+            email.clear();
+            id.clear();
+            code.clear();
+            ToastBar(color: Colors.green,text: 'Device Registered!').show();
+            Navigator.pushReplacement(
+              context,
+              CupertinoPageRoute(builder: (context) => DashBoard()),
+            );
+          }
+          else{
+            ToastBar(color: Colors.red,text: 'Company Doesn\'t Exists!').show();
+          }
+        }
+        else{
+          if(users[0]['deviceId']==''||users[0]['deviceId']==null){
+            await FirebaseFirestore.instance.collection('user').doc(email.text).update({
+              'deviceId': deviceID
+            });
+            ToastBar(color: Colors.green,text: 'Device Updated!').show();
+            Navigator.pushReplacement(
+              context,
+              CupertinoPageRoute(builder: (context) => DashBoard()),
+            );
+          }
+          else{
+            ToastBar(color: Colors.red,text: 'Your account is already registered on another device!').show();
+          }
+
+        }
+      }
+        catch(e){
+          ToastBar(color: Colors.red,text: 'Something went wrong!').show();
+          print("error is"+e.toString());
+        }
+
+    }else{
+      ToastBar(color: Colors.red,text: 'Please Fill all the Fields!').show();
     }
   }
 
@@ -62,6 +145,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
                 InputField(hint: 'Name',controller: name,),
                 InputField(hint: 'Email',type: TextInputType.emailAddress,controller: email,),
+                InputField(hint: 'ID Number',controller: id,),
                 InputField(hint: 'Company Code',controller: code,),
               
                 Padding(
@@ -82,7 +166,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: ScreenUtil().setWidth(60)),
-                  child: Button(text: 'Register',onclick: (){},),
+                  child: Button(text: 'Register',onclick: ()=>registerDevice(),),
                 )
 
               ],

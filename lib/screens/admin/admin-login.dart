@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
@@ -21,6 +22,7 @@ class _AdminLoginState extends State<AdminLogin> {
   TextEditingController password = TextEditingController();
 
   logIn() async {
+    await Firebase.initializeApp();
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try {
       UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -31,10 +33,12 @@ class _AdminLoginState extends State<AdminLogin> {
       var sub = await FirebaseFirestore.instance.collection('admin').where('email',isEqualTo: email.text).get();
       var logged = sub.docs;
 
-      Navigator.pushReplacement(
-        context,
-        CupertinoPageRoute(builder: (context) => AdminDashboard(name: logged[0]['name'],)),
-      );
+      if(logged.isNotEmpty){
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(builder: (context) => AdminDashboard(name: logged[0]['name'],code: logged[0]['code'],)),
+        );
+      }
 
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
