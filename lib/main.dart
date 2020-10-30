@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:skytech/screens/admin/admin-dashboard.dart';
 import 'package:skytech/screens/admin/user-analytics.dart';
 import 'package:skytech/screens/dashboard.dart';
+import 'package:skytech/screens/log.dart';
 import 'package:skytech/screens/select-user.dart';
 
 void main() {
@@ -22,7 +23,7 @@ class MyApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      home: SelectUser(),
+      home: Log(),
     );
   }
 }

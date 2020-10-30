@@ -35,46 +35,55 @@ class _AdminRegisterState extends State<AdminRegister> {
     await Firebase.initializeApp();
     if(email.text!='' && password.text!='' && name.text!=''&& code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
-      try {
-        UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-            email: email.text,
-            password: password.text
-        );
 
-        try{
-          await FirebaseFirestore.instance.collection('admin').doc(email.text).set({
-            'name': name.text,
-            'email': email.text,
-            'code': code.text,
-            'sites': [],
-            'users': [],
-            'devices': []
-          });
+      var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: code.text).get();
+      var codes = sub.docs;
+      if(codes.isEmpty){
+        try {
+          UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+              email: email.text,
+              password: password.text
+          );
 
-          name.clear();
-          email.clear();
-          password.clear();
-          code.clear();
+          try{
+            await FirebaseFirestore.instance.collection('admin').doc(email.text).set({
+              'name': name.text,
+              'email': email.text,
+              'code': code.text,
+              'sites': [],
+              'users': [],
+              'devices': []
+            });
 
-          ToastBar(color: Colors.green,text: 'Signed up successfully!').show();
+            name.clear();
+            email.clear();
+            password.clear();
+            code.clear();
 
-          Navigator.pop(context);
-        }
-        catch(e){
+            ToastBar(color: Colors.green,text: 'Signed up successfully!').show();
+
+            Navigator.pop(context);
+          }
+          catch(e){
+            ToastBar(color: Colors.red,text: 'Something went wrong!').show();
+            print("error is"+e.toString());
+          }
+
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'weak-password') {
+            ToastBar(color: Colors.red,text: 'Password is too weak!').show();
+          } else if (e.code == 'email-already-in-use') {
+            ToastBar(color: Colors.red,text: 'Account Already Exists!').show();
+          }
+        } catch (e) {
           ToastBar(color: Colors.red,text: 'Something went wrong!').show();
           print("error is"+e.toString());
         }
-
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'weak-password') {
-          ToastBar(color: Colors.red,text: 'Password is too weak!').show();
-        } else if (e.code == 'email-already-in-use') {
-          ToastBar(color: Colors.red,text: 'Account Already Exists!').show();
-        }
-      } catch (e) {
-        ToastBar(color: Colors.red,text: 'Something went wrong!').show();
-        print("error is"+e.toString());
       }
+      else{
+        ToastBar(color: Colors.red,text: 'Company Code is already exists!').show();
+      }
+
 
     }else{
       ToastBar(color: Colors.red,text: 'Please Fill all the Fields!').show();

@@ -1,9 +1,28 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/toast.dart';
 
 class DashBoard extends StatefulWidget {
+
+  final String name;
+  final String id;
+  final String companyName;
+  final String deviceID;
+  final String code;
+  final String email;
+  final bool isLogged;
+  final String lastTime;
+
+
+  const DashBoard({Key key, this.name, this.id, this.companyName, this.deviceID, this.code, this.email, this.isLogged=true, this.lastTime}) : super(key: key);
+
   @override
   _DashBoardState createState() => _DashBoardState();
 }
@@ -11,6 +30,12 @@ class DashBoard extends StatefulWidget {
 class _DashBoardState extends State<DashBoard> {
   String lat = "N/A";
   String long = "N/A";
+  String date = "N/A";
+  String location;
+  List<DropdownMenuItem<String>> workingSiteList = [];
+  bool logged;
+  String lastTime;
+  double distance;
 
   getLocation() async {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
@@ -20,11 +45,118 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
+  getDate(){
+    DateTime now = DateTime.now();
+    setState(() {
+      date = DateFormat('MM/dd/yyyy').format(now);
+    });
+  }
+
+  getWorkingSites() async {
+    await Firebase.initializeApp();
+    var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: widget.code).get();
+    var workingSites = sub.docs;
+    location = workingSites[0]['sites'][0];
+    for(int i=0;i<workingSites[0]['sites'].length;i++){
+      setState(() {
+        workingSiteList.add(
+          DropdownMenuItem(child: CustomText(text:workingSites[0]['sites'][i],color: Colors.black,),value: workingSites[0]['sites'][i],),
+        );
+      });
+    }
+  }
+
+  calculateDistance({double sLat,double sLong}) async {
+     distance = Geolocator.distanceBetween(sLat, sLong, double.parse(lat), double.parse(long));
+  }
+
+  onLoginPressed() async {
+    ToastBar(color: Colors.orange,text: 'Please wait...').show();
+    try{
+      DateTime now = DateTime.now();
+      String timestamp = now.toString();
+      String time = DateFormat('HH:mm').format(now);
+      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).set({
+            'timestamp': timestamp,
+            'lat': lat,
+            'long': long,
+            'location': location,
+            'date': date,
+            'login': time,
+            'logout': 'n/a'
+      });
+
+      await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+        'logged': true,
+        'timestamp': timestamp
+      });
+
+      setState(() {
+        logged = true;
+      });
+      ToastBar(color: Colors.green,text: 'Logged in!').show();
+    }
+    catch(e){
+      ToastBar(color: Colors.red,text: 'Something went wrong!').show();
+    }
+  }
+
+  onLogoutPressed() async {
+    ToastBar(color: Colors.orange,text: 'Please wait...').show();
+    try{
+
+      var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
+      var details = sub.docs;
+
+      String timestamp = details[0]['timestamp'];
+
+      var sub2 = await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').where('timestamp', isEqualTo: timestamp).get();
+      var locations = sub2.docs;
+      calculateDistance(sLat: double.parse(locations[0]['lat']),sLong: double.parse(locations[0]['long']));
+     print('distance is'+distance.toString());
+
+     if(distance<76){
+       DateTime now = DateTime.now();
+       String time = DateFormat('HH:mm').format(now);
+       var durInMins =  DateTime.now().difference(DateTime.parse(timestamp)).inMinutes;
+       var durInHours =  DateTime.now().difference(DateTime.parse(timestamp)).inHours;
+       int mins = durInMins - durInHours*60;
+       // print(durInHours.toString()+" h "+mins.toString()+" min");
+
+       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+         'logout': time
+       });
+
+       await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+         'logged': false,
+         'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
+       });
+
+       setState(() {
+         logged = false;
+         lastTime = durInHours.toString()+" h "+mins.toString()+" min";
+       });
+       ToastBar(color: Colors.green,text: 'Logged out!').show();
+     }
+     else{
+       ToastBar(color: Colors.red,text: 'You must within the range of 250ft from your logged in location!').show();
+     }
+
+    }
+    catch(e){
+      ToastBar(color: Colors.red,text: e.toString()).show();
+    }
+  }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getLocation();
+    getDate();
+    getWorkingSites();
+    logged = widget.isLogged;
+    lastTime = widget.lastTime;
   }
 
 
@@ -37,18 +169,26 @@ class _DashBoardState extends State<DashBoard> {
         centerTitle: true,
         title: CustomText(text: 'Dashboard'),
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(icon: Icon(Icons.assessment_sharp), onPressed: (){
+            Navigator.push(
+              context,
+              CupertinoPageRoute(builder: (context) => Log(email: widget.email,)),
+            );
+          })
+        ],
       ),
 
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: ScreenUtil().setHeight(50),),
+            SizedBox(height: ScreenUtil().setHeight(30),),
             Align(
               alignment: Alignment.topRight,
               child: Container(
-                height: ScreenUtil().setHeight(100),
-                width: ScreenUtil().setWidth(330),
+                height: ScreenUtil().setHeight(80),
+                width: ScreenUtil().setWidth(260),
                 decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.horizontal(left: Radius.circular(10))
@@ -58,36 +198,27 @@ class _DashBoardState extends State<DashBoard> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: <Widget>[
-                        Icon(Icons.calendar_today,size: 27,),
+                        Icon(Icons.calendar_today,size: 20,),
                         SizedBox(width: ScreenUtil().setWidth(20),),
-                        CustomText(text: "23/10/2020",size: ScreenUtil().setSp(40),color: Colors.black,),
+                        CustomText(text: date,size: ScreenUtil().setSp(30),color: Colors.black,),
                       ],
                     )
                 ),
               ),
             ),
             Padding(
-              padding: EdgeInsets.all(ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'Hello,',size: ScreenUtil().setSp(45),),
+              padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
+              child: CustomText(text: 'Hello,',size: ScreenUtil().setSp(35),),
             ),
+            SizedBox(height: ScreenUtil().setHeight(10),),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'Dulaj Nadawa',size: ScreenUtil().setSp(70),align: TextAlign.start,),
+              child: CustomText(text: widget.name,size: ScreenUtil().setSp(50),align: TextAlign.start,),
             ),
-            SizedBox(height: ScreenUtil().setHeight(30),),
+            SizedBox(height: ScreenUtil().setHeight(10),),
             Padding(
-              padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Padding(
-                  padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                  child: CustomText(text: 'Location - Site ID',color: Colors.black,size: ScreenUtil().setSp(30),),
-                ),
-              ),
+              padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
+              child: CustomText(text: 'ID:- #${widget.id}',size: ScreenUtil().setSp(30),),
             ),
             SizedBox(height: ScreenUtil().setHeight(30),),
             Padding(
@@ -102,8 +233,8 @@ class _DashBoardState extends State<DashBoard> {
                   padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
                   child: Column(
                     children: [
-                      CustomText(text: 'Latitude',color: Colors.black,size: ScreenUtil().setSp(35),),
-                      SizedBox(height: ScreenUtil().setHeight(20),),
+                      CustomText(text: 'Latitude',color: Colors.black,size: ScreenUtil().setSp(30),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
                       Padding(
                         padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
                         child: Container(
@@ -114,13 +245,13 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: lat,color: Colors.black,size: ScreenUtil().setSp(30),),
+                            child: CustomText(text: lat,color: Colors.black,size: ScreenUtil().setSp(28),),
                           ),
                         ),
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(20),),
-                      CustomText(text: 'Longitude',color: Colors.black,size: ScreenUtil().setSp(35),),
-                      SizedBox(height: ScreenUtil().setHeight(20),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      CustomText(text: 'Longitude',color: Colors.black,size: ScreenUtil().setSp(30),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
                       Padding(
                         padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
                         child: Container(
@@ -131,19 +262,105 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: long,color: Colors.black,size: ScreenUtil().setSp(30),),
+                            child: CustomText(text: long,color: Colors.black,size: ScreenUtil().setSp(28),),
                           ),
                         ),
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(20),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      CustomText(text: 'Company Name',color: Colors.black,size: ScreenUtil().setSp(30),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      Padding(
+                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                            child: CustomText(text: widget.companyName,color: Colors.black,size: ScreenUtil().setSp(28),),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      CustomText(text: 'Device ID',color: Colors.black,size: ScreenUtil().setSp(30),),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      Padding(
+                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                            child: CustomText(text: widget.deviceID,color: Colors.black,size: ScreenUtil().setSp(28),),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: ScreenUtil().setHeight(15),),
                     ],
                   ),
                 ),
               ),
             ),
 
+            SizedBox(height: ScreenUtil().setHeight(30),),
 
+            Visibility(
+              visible: !logged,
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Color(0xff99A8B2),
+                    border: Border.all(color: Colors.white,width: 3)
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(16)),
+                    child: DropdownButton(
+                      underline: Divider(color: Color(0xff99A8B2),height: 0,thickness: 0,),
+                      items: workingSiteList,
+                      onChanged:(newValue){
+                        setState(() {
+                          location = newValue;
+                        });
+                      },
+                      value: location,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: ScreenUtil().setHeight(40),),
+            Center(
+              child: GestureDetector(
+                onTap: ()=>!logged?onLoginPressed():onLogoutPressed(),
+                child: Container(
+                  width: ScreenUtil().setWidth(400),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: !logged?Colors.green:Colors.red
+                  ),
+                  child: Padding(
+                    padding:  EdgeInsets.all(ScreenUtil().setSp(40)),
+                    child: CustomText(text: !logged?'Login':'Logout',size: ScreenUtil().setSp(70),),
+                  ),
+                ),
+              ),
+            ),
 
+            Visibility(
+              visible: !logged,
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(ScreenUtil().setWidth(30)),
+                  child: CustomText(text: 'Last logged time - $lastTime',size: ScreenUtil().setSp(35),),
+                ),
+              ),
+            ),
           ],
         ),
       ),
