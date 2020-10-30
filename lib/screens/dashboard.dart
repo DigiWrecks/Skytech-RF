@@ -76,6 +76,15 @@ class _DashBoardState extends State<DashBoard> {
       DateTime now = DateTime.now();
       String timestamp = now.toString();
       String time = DateFormat('HH:mm').format(now);
+
+      var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
+      var details = sub.docs;
+
+      List locationList = details[0]['locations'];
+      if(!locationList.contains(location)){
+        locationList.add(location);
+      }
+
       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).set({
             'timestamp': timestamp,
             'lat': lat,
@@ -88,7 +97,8 @@ class _DashBoardState extends State<DashBoard> {
 
       await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
         'logged': true,
-        'timestamp': timestamp
+        'timestamp': timestamp,
+        'locations': locationList
       });
 
       setState(() {

@@ -7,15 +7,15 @@ import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
 
-class Settings extends StatefulWidget {
+class SettingsScreen extends StatefulWidget {
 
   final String code;
-  const Settings({Key key, this.code}) : super(key: key);
+  const SettingsScreen({Key key, this.code}) : super(key: key);
   @override
-  _SettingsState createState() => _SettingsState();
+  _SettingsScreenState createState() => _SettingsScreenState();
 }
 
-class _SettingsState extends State<Settings> {
+class _SettingsScreenState extends State<SettingsScreen> {
   TextEditingController newLocation = TextEditingController();
 
   popUpCard(BuildContext context) async {
@@ -143,9 +143,11 @@ class _SettingsState extends State<Settings> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Padding(
-                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: location,color: Colors.black,size: ScreenUtil().setSp(30),),
+                          Flexible(
+                            child: Padding(
+                              padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                              child: CustomText(text: location,color: Colors.black,size: ScreenUtil().setSp(30),),
+                            ),
                           ),
                           IconButton(icon: Icon(Icons.delete), onPressed: () async {
                                   locationList.removeAt(i);

@@ -72,7 +72,8 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               'deviceId': deviceID,
               'logged': false,
               'timestamp': DateTime.now().toString(),
-              'lastTime': '0h 0min'
+              'lastTime': '0h 0min',
+              'locations': []
             });
 
             await FirebaseFirestore.instance.collection('admin').doc(companies[0].id).update({
