@@ -180,7 +180,8 @@ class _UserAnalyticsState extends State<UserAnalytics> {
               children: [
                 Icon(Icons.account_circle_outlined,color: Colors.white,size: 35,),
                 SizedBox(width: ScreenUtil().setWidth(20),),
-                CustomText(text: widget.name,size: ScreenUtil().setSp(50),),
+                Flexible(
+                    child: CustomText(text: widget.name,size: ScreenUtil().setSp(50),)),
               ],
             ),
           ),
@@ -192,7 +193,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                   borderRadius: BorderRadius.circular(40)
               ),
               child: Padding(
-                padding: EdgeInsets.all(ScreenUtil().setHeight(25)),
+                padding: EdgeInsets.all(ScreenUtil().setHeight(15)),
                 child: CustomText(text: logged?'Logged In':'Logged Out',color: logged?Colors.green:Colors.red,size: ScreenUtil().setSp(30),),
               ),
             ),

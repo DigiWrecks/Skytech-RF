@@ -22,7 +22,7 @@ class Button extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         color: color,
-        padding: EdgeInsets.all(15),
+        padding: EdgeInsets.all(10),
         child: CustomText(text: text,size: 18,color: textColor,),
       ),
     );

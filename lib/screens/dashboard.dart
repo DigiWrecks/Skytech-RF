@@ -38,7 +38,7 @@ class _DashBoardState extends State<DashBoard> {
   double distance;
 
   getLocation() async {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     setState(() {
       lat = position.latitude.toString();
       long = position.longitude.toString();
@@ -67,7 +67,9 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   calculateDistance({double sLat,double sLong}) async {
-     distance = Geolocator.distanceBetween(sLat, sLong, double.parse(lat), double.parse(long));
+    getLocation();
+    print(sLat.toString()+" "+sLong.toString());
+    distance = Geolocator.distanceBetween(sLat, sLong, double.parse(lat), double.parse(long));
   }
 
   onLoginPressed() async {
@@ -154,7 +156,7 @@ class _DashBoardState extends State<DashBoard> {
 
     }
     catch(e){
-      ToastBar(color: Colors.red,text: 'Something went wrong!').show();
+      ToastBar(color: Colors.red,text: "Something went wrong!").show();
     }
   }
 

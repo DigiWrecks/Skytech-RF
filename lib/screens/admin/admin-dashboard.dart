@@ -115,6 +115,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           SizedBox(height: ScreenUtil().setHeight(30),),
           Center(
             child: Container(
+              height: ScreenUtil().setHeight(90),
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
                   color: Color(0xff99A8B2),
@@ -187,6 +188,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                           padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(10)),
                           child: profiles!=null?ListView.builder(
                             itemCount: profiles.length,
+                            physics: BouncingScrollPhysics(),
                             itemBuilder: (context,i){
                               String name = profiles[i]['name'];
                               String email = profiles[i]['email'];

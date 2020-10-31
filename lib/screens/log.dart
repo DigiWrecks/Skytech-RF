@@ -52,6 +52,7 @@ class _LogState extends State<Log> {
       body: Padding(
         padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
         child: logs!=null?ListView.builder(
+          physics: BouncingScrollPhysics(),
           itemCount: logs.length,
           itemBuilder: (context,i){
             String date = logs[i]['date'];
