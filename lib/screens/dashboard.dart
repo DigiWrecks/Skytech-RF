@@ -154,7 +154,7 @@ class _DashBoardState extends State<DashBoard> {
 
     }
     catch(e){
-      ToastBar(color: Colors.red,text: e.toString()).show();
+      ToastBar(color: Colors.red,text: 'Something went wrong!').show();
     }
   }
 

@@ -189,13 +189,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             itemCount: profiles.length,
                             itemBuilder: (context,i){
                               String name = profiles[i]['name'];
+                              String email = profiles[i]['email'];
                               return Padding(
                                 padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
                                 child: GestureDetector(
                                   onTap: (){
                                     Navigator.push(
                                       context,
-                                      CupertinoPageRoute(builder: (context) => UserAnalytics()),
+                                      CupertinoPageRoute(builder: (context) => UserAnalytics(name: name,email: email,workSite: location,)),
                                     );
                                   },
                                   child: Container(

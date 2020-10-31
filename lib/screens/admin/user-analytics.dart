@@ -1,10 +1,91 @@
+import 'dart:async';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/toast.dart';
 
-class UserAnalytics extends StatelessWidget {
+class UserAnalytics extends StatefulWidget {
+  final String name;
+  final String email;
+  final String workSite;
+
+  const UserAnalytics({Key key, this.name, this.email, this.workSite}) : super(key: key);
+  @override
+  _UserAnalyticsState createState() => _UserAnalyticsState();
+}
+
+class _UserAnalyticsState extends State<UserAnalytics> {
+
+  List<DocumentSnapshot> status;
+  List<DocumentSnapshot> logs;
+  StreamSubscription<QuerySnapshot> subscription;
+  StreamSubscription<QuerySnapshot> subscription2;
+  bool logged = false;
+  String timestamp;
+  String deviceID;
+
+  getStatus(){
+    subscription = FirebaseFirestore.instance.collection('user').where('email', isEqualTo: widget.email).snapshots().listen((datasnapshot){
+      setState(() {
+        status = datasnapshot.docs;
+        logged = status[0]['logged'];
+        timestamp = status[0]['timestamp'];
+        deviceID = status[0]['deviceId'];
+      });
+    });
+  }
+
+  getLog(){
+    if(widget.workSite=='All'){
+      subscription2 = FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').orderBy('timestamp',descending: true).snapshots().listen((datasnapshot){
+        setState(() {
+          logs = datasnapshot.docs;
+        });
+      });
+    }
+    else{
+      subscription2 = FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').where('location', isEqualTo: widget.workSite).orderBy('timestamp',descending: true).snapshots().listen((datasnapshot){
+        setState(() {
+          logs = datasnapshot.docs;
+        });
+      });
+    }
+    
+  }
+
+  logOutUser() async {
+    ToastBar(color: Colors.orange,text: 'Please wait...').show();
+    try{
+      DateTime now = DateTime.now();
+        String time = DateFormat('HH:mm').format(now);
+        var durInMins =  DateTime.now().difference(DateTime.parse(timestamp)).inMinutes;
+        var durInHours =  DateTime.now().difference(DateTime.parse(timestamp)).inHours;
+        int mins = durInMins - durInHours*60;
+        // print(durInHours.toString()+" h "+mins.toString()+" min");
+
+        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+          'logout': time
+        });
+
+        await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+          'logged': false,
+          'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
+        });
+
+        setState(() {
+          logged = false;
+        });
+        ToastBar(color: Colors.green,text: 'Logged out!').show();
+    }
+    catch(e){
+      ToastBar(color: Colors.red,text: 'Somethings went wrong!').show();
+    }
+  }
 
   popUpCard(BuildContext context) async {
     showDialog(
@@ -26,13 +107,22 @@ class UserAnalytics extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                    child: CustomText(text: 'abcde-fghij-klmno-pqrst-uvwxyz',color: Colors.white,size: ScreenUtil().setSp(30),),
+                    child: CustomText(text: deviceID,color: Colors.white,size: ScreenUtil().setSp(30),),
                   ),
                 ),
                 Padding(
                   padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                  child: Button(text: 'Remove ID',color: Colors.red,onclick: (){
-                    Navigator.pop(context);
+                  child: Button(text: 'Remove ID',color: Colors.red,onclick: () async {
+                    try{
+                      await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+                        'deviceId': ''
+                      });
+                      ToastBar(color: Colors.green,text: 'Device ID Removed!').show();
+                      Navigator.pop(context);
+                    }
+                    catch(e){
+                      ToastBar(color: Colors.red,text: 'Something went wrong!').show();
+                    }
                   }),
                 ),
               ],
@@ -41,6 +131,31 @@ class UserAnalytics extends StatelessWidget {
         );
       },
     );
+  }
+
+  onEditing({String docId,String login,String logout,String lat,String long}) async {
+    await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(docId).update({
+      'login': login,
+      'logout': logout,
+      'lat': lat,
+      'long': long
+    });
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getStatus();
+    getLog();
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    subscription?.cancel();
+    subscription2?.cancel();
   }
 
   @override
@@ -65,7 +180,7 @@ class UserAnalytics extends StatelessWidget {
               children: [
                 Icon(Icons.account_circle_outlined,color: Colors.white,size: 35,),
                 SizedBox(width: ScreenUtil().setWidth(20),),
-                CustomText(text: 'Dulaj Nadawa',size: ScreenUtil().setSp(50),),
+                CustomText(text: widget.name,size: ScreenUtil().setSp(50),),
               ],
             ),
           ),
@@ -78,158 +193,212 @@ class UserAnalytics extends StatelessWidget {
               ),
               child: Padding(
                 padding: EdgeInsets.all(ScreenUtil().setHeight(25)),
-                child: CustomText(text: 'Logged In',color: Colors.green,size: ScreenUtil().setSp(30),),
+                child: CustomText(text: logged?'Logged In':'Logged Out',color: logged?Colors.green:Colors.red,size: ScreenUtil().setSp(30),),
               ),
             ),
           ),
 
-          Padding(
-            padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-            child: Button(text: 'Logout User',color: Colors.red,onclick: (){}),
+          Visibility(
+            visible: logged,
+            child: Padding(
+              padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+              child: Button(text: 'Logout User',color: Colors.red,onclick: ()=>logOutUser()),
+            ),
           ),
 
           Expanded(
             child: Padding(
               padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
-              child: ListView(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xff99A8B2),
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding:  EdgeInsets.all(ScreenUtil().setHeight(25)),
-                      child: Column(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.calendar_today,size: 25,),
-                              SizedBox(width: ScreenUtil().setWidth(20),),
-                              CustomText(text: '12/31/2020',size: ScreenUtil().setSp(35),color: Colors.black,),
-                            ],
-                          ),
-                          SizedBox(height: ScreenUtil().setHeight(20),),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: Color(0xffE6D5B8),
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.grey,
-                                            borderRadius: BorderRadius.only(topLeft: Radius.circular(10)),
-                                            border: Border.all(color: Colors.white,width: 3)
-                                        ),
-                                        child: Padding(
-                                          padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                          child: Row(
-                                            children: [
-                                              CustomText(text: 'Login:-',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                              SizedBox(width: ScreenUtil().setWidth(10),),
-                                              Expanded(
-                                                child: TextField(
-                                                  cursorColor: Colors.black,
-                                                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                                  decoration: InputDecoration(
-                                                    hintText: '00:00',
-                                                    enabledBorder:InputBorder.none,
-                                                    focusedBorder: InputBorder.none,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    Expanded(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey,
-                                          borderRadius: BorderRadius.only(topRight: Radius.circular(10)),
-                                          border: Border.all(color: Colors.white,width: 3)
-                                        ),
-                                        child: Padding(
-                                          padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                          child: Row(
-                                            children: [
-                                              CustomText(text: 'Logout:-',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                              SizedBox(width: ScreenUtil().setWidth(10),),
-                                              Expanded(
-                                                child: TextField(
-                                                  cursorColor: Colors.black,
-                                                  style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                                  decoration: InputDecoration(
-                                                    hintText: '00:00',
-                                                    enabledBorder:InputBorder.none,
-                                                    focusedBorder: InputBorder.none,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+              child: logs!=null?ListView.builder(
+                physics: BouncingScrollPhysics(),
+                itemCount: logs.length,
+                itemBuilder: (context,i){
+                  TextEditingController loginEdit = TextEditingController();
+                  TextEditingController logoutEdit = TextEditingController();
+                  TextEditingController latEdit = TextEditingController();
+                  TextEditingController longEdit = TextEditingController();
 
-                                Padding(
-                                  padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
-                                  child: Row(
-                                    children: [
-                                      CustomText(text: 'Latitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                      SizedBox(width: ScreenUtil().setWidth(10),),
-                                      Expanded(
-                                        child: TextField(
-                                          cursorColor: Colors.black,
-                                          style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                          decoration: InputDecoration(
-                                            hintText: '6.541234',
-                                            enabledBorder:InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Padding(
-                                  padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
-                                  child: Row(
-                                    children: [
-                                      CustomText(text: 'Longitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                      SizedBox(width: ScreenUtil().setWidth(10),),
-                                      Expanded(
-                                        child: TextField(
-                                          cursorColor: Colors.black,
-                                          style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                          decoration: InputDecoration(
-                                            hintText: '6.541234',
-                                            enabledBorder:InputBorder.none,
-                                            focusedBorder: InputBorder.none,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                    loginEdit.text = logs[i]['login'];
+                    logoutEdit.text = logs[i]['logout'];
+                    latEdit.text = logs[i]['lat'];
+                    longEdit.text = logs[i]['long'];
+
+
+                  String location = logs[i]['location'];
+                  String date = logs[i]['date'];
+
+                  return Padding(
+                    padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xff99A8B2),
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.all(ScreenUtil().setHeight(25)),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.calendar_today,size: 25,),
+                                SizedBox(width: ScreenUtil().setWidth(20),),
+                                CustomText(text: date,size: ScreenUtil().setSp(35),color: Colors.black,),
                               ],
                             ),
-                          ),
-                        ],
+                            SizedBox(height: ScreenUtil().setHeight(20),),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Color(0xffE6D5B8),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.grey,
+                                              borderRadius: BorderRadius.only(topLeft: Radius.circular(10)),
+                                              border: Border.all(color: Colors.white,width: 3)
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                            child: Row(
+                                              children: [
+                                                CustomText(text: 'Login:-',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                                SizedBox(width: ScreenUtil().setWidth(10),),
+                                                Expanded(
+                                                  child: TextField(
+                                                    controller: loginEdit,
+                                                    cursorColor: Colors.black,
+                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                                    decoration: InputDecoration(
+                                                      hintText: '00:00',
+                                                      enabledBorder:InputBorder.none,
+                                                      focusedBorder: InputBorder.none,
+                                                    ),
+                                                    onSubmitted: (x) async {
+                                                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                        'login': x,
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.grey,
+                                              borderRadius: BorderRadius.only(topRight: Radius.circular(10)),
+                                              border: Border.all(color: Colors.white,width: 3)
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                            child: Row(
+                                              children: [
+                                                CustomText(text: 'Logout:-',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                                SizedBox(width: ScreenUtil().setWidth(10),),
+                                                Expanded(
+                                                  child: TextField(
+                                                    controller: logoutEdit,
+                                                    cursorColor: Colors.black,
+                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                                    decoration: InputDecoration(
+                                                      hintText: '00:00',
+                                                      enabledBorder:InputBorder.none,
+                                                      focusedBorder: InputBorder.none,
+                                                    ),
+                                                    onSubmitted: (x) async {
+                                                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                        'logout': x,
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Latitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: latEdit,
+                                            cursorColor: Colors.black,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                            decoration: InputDecoration(
+                                              hintText: '6.541234',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'lat': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Longitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: longEdit,
+                                            cursorColor: Colors.black,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                            decoration: InputDecoration(
+                                              hintText: '6.541234',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'long': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: ScreenUtil().setHeight(25),),
+                                  Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
+                                    child: CustomText(text: 'Location :- $location',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                  ),
+                                  
+                                  SizedBox(height: ScreenUtil().setHeight(30),)
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
+                  );
+                },
+              ):Center(child: CircularProgressIndicator(),),
             ),
           ),
 
