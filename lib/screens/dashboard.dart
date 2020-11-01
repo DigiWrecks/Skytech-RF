@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:ntp/ntp.dart';
 import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/toast.dart';
+
 
 class DashBoard extends StatefulWidget {
 
@@ -45,10 +47,10 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
-  getDate(){
-    DateTime now = DateTime.now();
+  getDate() async {
+    DateTime now = await NTP.now();
     setState(() {
-      date = DateFormat('MM/dd/yyyy').format(now);
+      date = DateFormat('MM/dd/yyyy').format(now.toUtc().subtract(Duration(hours: 7)));
     });
   }
 
@@ -75,9 +77,9 @@ class _DashBoardState extends State<DashBoard> {
   onLoginPressed() async {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
-      DateTime now = DateTime.now();
-      String timestamp = now.toString();
-      String time = DateFormat('HH:mm').format(now);
+      DateTime now = await NTP.now();
+      String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
+      String timestamp = now.toUtc().subtract(Duration(hours: 7)).toString();
 
       var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
       var details = sub.docs;
@@ -94,7 +96,8 @@ class _DashBoardState extends State<DashBoard> {
             'location': location,
             'date': date,
             'login': time,
-            'logout': 'n/a'
+            'logout': 'n/a',
+            'worked': 'n/a'
       });
 
       await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
@@ -128,15 +131,16 @@ class _DashBoardState extends State<DashBoard> {
      print('distance is'+distance.toString());
 
      if(distance<76){
-       DateTime now = DateTime.now();
-       String time = DateFormat('HH:mm').format(now);
-       var durInMins =  DateTime.now().difference(DateTime.parse(timestamp)).inMinutes;
-       var durInHours =  DateTime.now().difference(DateTime.parse(timestamp)).inHours;
+       DateTime now = await NTP.now();
+       String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
+       var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
+       var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
        int mins = durInMins - durInHours*60;
        // print(durInHours.toString()+" h "+mins.toString()+" min");
 
        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
-         'logout': time
+         'logout': time,
+         'worked': durInHours.toString()+" h "+mins.toString()+" min"
        });
 
        await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
@@ -217,10 +221,6 @@ class _DashBoardState extends State<DashBoard> {
                     )
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'Hello,',size: ScreenUtil().setSp(35),),
             ),
             SizedBox(height: ScreenUtil().setHeight(10),),
             Padding(
@@ -349,7 +349,25 @@ class _DashBoardState extends State<DashBoard> {
             SizedBox(height: ScreenUtil().setHeight(40),),
             Center(
               child: GestureDetector(
-                onTap: ()=>!logged?onLoginPressed():onLogoutPressed(),
+                onTap: (){
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context){
+                      return AlertDialog(
+                        content: CustomText(text: 'Are you sure you want to ${!logged?'log in':'log out'}?',color: Colors.black,),
+                        actions: [
+                          FlatButton(onPressed: (){
+                            !logged?onLoginPressed():onLogoutPressed();
+                            Navigator.pop(context);
+                            }, child: CustomText(text: 'Yes',color: Colors.black,)),
+                          FlatButton(onPressed: () async {
+                            Navigator.pop(context);
+                          }, child: CustomText(text: 'No',color: Colors.black,)),
+                        ],
+                      );
+                    }
+                  );
+                },
                 child: Container(
                   width: ScreenUtil().setWidth(400),
                   decoration: BoxDecoration(

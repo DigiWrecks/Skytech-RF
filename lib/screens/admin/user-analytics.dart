@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:intl/intl.dart';
+import 'package:ntp/ntp.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/toast.dart';
@@ -61,15 +62,16 @@ class _UserAnalyticsState extends State<UserAnalytics> {
   logOutUser() async {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
-      DateTime now = DateTime.now();
-        String time = DateFormat('HH:mm').format(now);
-        var durInMins =  DateTime.now().difference(DateTime.parse(timestamp)).inMinutes;
-        var durInHours =  DateTime.now().difference(DateTime.parse(timestamp)).inHours;
+      DateTime now = await NTP.now();
+        String time = DateFormat('HH:mm').format(now.toUtc().subtract(Duration(hours: 7)));
+        var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
+        var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
         int mins = durInMins - durInHours*60;
         // print(durInHours.toString()+" h "+mins.toString()+" min");
 
         await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
-          'logout': time
+          'logout': time,
+          'worked': durInHours.toString()+" h "+mins.toString()+" min"
         });
 
         await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
@@ -226,6 +228,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
 
 
                   String location = logs[i]['location'];
+                  String worked = logs[i]['worked'];
                   String date = logs[i]['date'];
 
                   return Padding(
@@ -269,13 +272,13 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
                                             child: Row(
                                               children: [
-                                                CustomText(text: 'Login:-',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                                CustomText(text: 'Login:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                 SizedBox(width: ScreenUtil().setWidth(10),),
                                                 Expanded(
                                                   child: TextField(
                                                     controller: loginEdit,
                                                     cursorColor: Colors.black,
-                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                     decoration: InputDecoration(
                                                       hintText: '00:00',
                                                       enabledBorder:InputBorder.none,
@@ -304,13 +307,13 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
                                             child: Row(
                                               children: [
-                                                CustomText(text: 'Logout:-',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                                CustomText(text: 'Logout:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                 SizedBox(width: ScreenUtil().setWidth(10),),
                                                 Expanded(
                                                   child: TextField(
                                                     controller: logoutEdit,
                                                     cursorColor: Colors.black,
-                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
+                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                     decoration: InputDecoration(
                                                       hintText: '00:00',
                                                       enabledBorder:InputBorder.none,
@@ -335,7 +338,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                     padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
                                     child: Row(
                                       children: [
-                                        CustomText(text: 'Latitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                        CustomText(text: 'Latitude :',size: ScreenUtil().setSp(35),color: Colors.black,),
                                         SizedBox(width: ScreenUtil().setWidth(10),),
                                         Expanded(
                                           child: TextField(
@@ -361,7 +364,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                     padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
                                     child: Row(
                                       children: [
-                                        CustomText(text: 'Longitude :- ',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                        CustomText(text: 'Longitude :',size: ScreenUtil().setSp(35),color: Colors.black,),
                                         SizedBox(width: ScreenUtil().setWidth(10),),
                                         Expanded(
                                           child: TextField(
@@ -386,7 +389,12 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                   SizedBox(height: ScreenUtil().setHeight(25),),
                                   Padding(
                                     padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
-                                    child: CustomText(text: 'Location :- $location',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                    child: CustomText(text: 'Location : $location',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                  ),
+                                  SizedBox(height: ScreenUtil().setHeight(45),),
+                                  Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
+                                    child: CustomText(text: 'Worked Time : $worked',size: ScreenUtil().setSp(35),color: Colors.black,),
                                   ),
                                   
                                   SizedBox(height: ScreenUtil().setHeight(30),)

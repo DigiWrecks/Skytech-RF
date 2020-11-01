@@ -36,9 +36,9 @@ class _AdminRegisterState extends State<AdminRegister> {
     if(email.text!='' && password.text!='' && name.text!=''&& code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
 
-      var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: code.text).get();
+      var sub = await FirebaseFirestore.instance.collection('codes').where('code',isEqualTo: code.text).get();
       var codes = sub.docs;
-      if(codes.isEmpty){
+      if(codes.isNotEmpty){
         try {
           UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
               email: email.text,
@@ -81,7 +81,7 @@ class _AdminRegisterState extends State<AdminRegister> {
         }
       }
       else{
-        ToastBar(color: Colors.red,text: 'Company Code is already exists!').show();
+        ToastBar(color: Colors.red,text: 'Company Code doesn\'t exists!').show();
       }
 
 

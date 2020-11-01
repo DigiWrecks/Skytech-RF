@@ -105,11 +105,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
           SizedBox(height: ScreenUtil().setHeight(20),),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-            child: CustomText(text: 'Hello,',size: ScreenUtil().setSp(45),),
-          ),
-          SizedBox(height: ScreenUtil().setHeight(20),),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
             child: CustomText(text: widget.name,size: ScreenUtil().setSp(70),align: TextAlign.start,),
           ),
           SizedBox(height: ScreenUtil().setHeight(30),),

@@ -35,18 +35,6 @@ class SelectUser extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Color(0xff9CA7B3),
-                        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                        border: Border.all(color: Colors.white,width: 3)
-                      ),
-                      child: Padding(
-                        padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                        child: CustomText(text: 'Who you are?',size: ScreenUtil().setSp(40),),
-                      ),
-                    ),
                     SizedBox(height: ScreenUtil().setHeight(100),),
                     Padding(
                       padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50)),

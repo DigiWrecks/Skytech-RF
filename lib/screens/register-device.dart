@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:ntp/ntp.dart';
 import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
@@ -64,6 +65,8 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               userList.add(email.text);
               deviceList.add(deviceID);
 
+              DateTime time = await NTP.now();
+
             await FirebaseFirestore.instance.collection('user').doc(email.text).set({
               'name': name.text,
               'email': email.text,
@@ -71,7 +74,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               'id': id.text,
               'deviceId': deviceID,
               'logged': false,
-              'timestamp': DateTime.now().toString(),
+              'timestamp': time.toUtc().subtract(Duration(hours: 7)).toString(),
               'lastTime': '0h 0min',
               'locations': []
             });
