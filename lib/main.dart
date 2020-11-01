@@ -1,15 +1,11 @@
 import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:skytech/screens/admin/admin-dashboard.dart';
-import 'package:skytech/screens/admin/user-analytics.dart';
 import 'package:skytech/screens/dashboard.dart';
-import 'package:skytech/screens/log.dart';
 import 'package:skytech/screens/select-user.dart';
 
 void main() {

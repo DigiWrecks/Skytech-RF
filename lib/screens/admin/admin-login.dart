@@ -25,7 +25,7 @@ class _AdminLoginState extends State<AdminLogin> {
     await Firebase.initializeApp();
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try {
-      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
           email: email.text,
           password: password.text
       );

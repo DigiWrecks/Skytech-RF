@@ -44,7 +44,12 @@ class _LogState extends State<Log> {
 
   }
 
-
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    subscription?.cancel();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +73,7 @@ class _LogState extends State<Log> {
             String login = logs[i]['login'];
             String logout = logs[i]['logout'];
             String location = logs[i]['location'];
-            String worked = logs[i]['worked'];
+
             return Padding(
               padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
               child: Container(
@@ -140,10 +145,7 @@ class _LogState extends State<Log> {
                               padding:  EdgeInsets.all(ScreenUtil().setWidth(20)),
                               child: CustomText(text: 'Location : $location',size: ScreenUtil().setSp(35),color: Colors.black,),
                             ),
-                            Padding(
-                              padding:  EdgeInsets.all(ScreenUtil().setWidth(20)),
-                              child: CustomText(text: 'Worked Time : $worked',size: ScreenUtil().setSp(35),color: Colors.black,),
-                            ),
+
                             SizedBox(height: ScreenUtil().setHeight(10),)
                           ],
                         ),

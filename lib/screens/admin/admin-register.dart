@@ -9,7 +9,7 @@ import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/inputfield.dart';
 import 'package:skytech/widgets/toast.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 class AdminRegister extends StatefulWidget {
   @override
   _AdminRegisterState createState() => _AdminRegisterState();
@@ -40,7 +40,7 @@ class _AdminRegisterState extends State<AdminRegister> {
       var codes = sub.docs;
       if(codes.isNotEmpty){
         try {
-          UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
               email: email.text,
               password: password.text
           );

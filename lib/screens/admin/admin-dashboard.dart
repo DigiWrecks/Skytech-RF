@@ -80,6 +80,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
     getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('name',descending: true));
 
   }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    subscription?.cancel();
+  }
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context,designSize: Size(720, 1520), allowFontScaling: false);

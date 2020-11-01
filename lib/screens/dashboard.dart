@@ -230,7 +230,7 @@ class _DashBoardState extends State<DashBoard> {
             SizedBox(height: ScreenUtil().setHeight(10),),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'ID:- #${widget.id}',size: ScreenUtil().setSp(30),),
+              child: CustomText(text: 'ID : ${widget.id}',size: ScreenUtil().setSp(30),),
             ),
             SizedBox(height: ScreenUtil().setHeight(30),),
             Padding(
