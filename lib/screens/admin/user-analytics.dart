@@ -63,7 +63,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
       DateTime now = await NTP.now();
-        String time = DateFormat('HH:mm').format(now.toUtc().subtract(Duration(hours: 7)));
+        String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
         var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
         var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
         int mins = durInMins - durInHours*60;
