@@ -7,6 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:skytech/screens/log.dart';
+import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/toast.dart';
 
@@ -164,6 +165,53 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
+  notePopUp(BuildContext context) async {
+    TextEditingController note = TextEditingController();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          title: CustomText(text: 'Note',align: TextAlign.center,color: Colors.black,),
+          content: Container(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  cursorColor: Colors.black,
+                  decoration: InputDecoration(
+                    hintText: 'Type your note here',
+                    enabledBorder:UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 2),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(color: Colors.black, width: 5),
+                    ),
+                  ),
+                  controller: note,
+                ),
+                Padding(
+                  padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+                  child: Button(text: 'Submit',color: Colors.green,onclick: () async {
+                    if(note.text.isNotEmpty){
+                      onLogoutPressed();
+                      Navigator.pop(context);
+                    }
+                    else{
+                      ToastBar(text: 'Please fill the note',color: Colors.red).show();
+                    }
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void initState() {
     // TODO: implement initState
@@ -173,6 +221,9 @@ class _DashBoardState extends State<DashBoard> {
     getWorkingSites();
     logged = widget.isLogged;
     lastTime = widget.lastTime;
+
+    print(widget.name+widget.id+widget.code+widget.email+widget.companyName+widget.deviceID+widget.lastTime+widget.isLogged.toString());
+
   }
 
 
@@ -357,8 +408,13 @@ class _DashBoardState extends State<DashBoard> {
                         content: CustomText(text: 'Are you sure you want to ${!logged?'log in':'log out'}?',color: Colors.black,),
                         actions: [
                           FlatButton(onPressed: (){
-                            !logged?onLoginPressed():onLogoutPressed();
-                            Navigator.pop(context);
+                            if(!logged){
+                              onLoginPressed();
+                              Navigator.pop(context);
+                            }else{
+                              Navigator.pop(context);
+                              notePopUp(context);
+                            }
                             }, child: CustomText(text: 'Yes',color: Colors.black,)),
                           FlatButton(onPressed: () async {
                             Navigator.pop(context);

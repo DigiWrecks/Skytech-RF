@@ -95,12 +95,14 @@ class _LogState extends State<Log> {
                       SizedBox(height: ScreenUtil().setHeight(20),),
                       Container(
                         decoration: BoxDecoration(
-                          color: Color(0xffE6D5B8),
+                          color: Theme.of(context).accentColor,
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+
+                            ///login & logout
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -133,14 +135,53 @@ class _LogState extends State<Log> {
                               ],
                             ),
 
-                            Padding(
-                              padding:  EdgeInsets.all(ScreenUtil().setWidth(20)),
-                              child: CustomText(text: 'Latitude : $lat',size: ScreenUtil().setSp(35),color: Colors.black,),
+                            ///blueBox
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.white,width: 3),
+                                        borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10))
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
+                                          child: CustomText(text: 'Latitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                        ),
+                                        Padding(
+                                          padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
+                                          child: CustomText(text: 'Longitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(color: Colors.white,width: 3),
+                                        borderRadius: BorderRadius.only(bottomRight: Radius.circular(10))
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
+                                          child: CustomText(text: 'Latitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                        ),
+                                        Padding(
+                                          padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
+                                          child: CustomText(text: 'Longitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Padding(
-                              padding:  EdgeInsets.all(ScreenUtil().setWidth(20)),
-                              child: CustomText(text: 'Longitude : $long',size: ScreenUtil().setSp(35),color: Colors.black,),
-                            ),
+
                             Padding(
                               padding:  EdgeInsets.all(ScreenUtil().setWidth(20)),
                               child: CustomText(text: 'Location : $location',size: ScreenUtil().setSp(35),color: Colors.black,),

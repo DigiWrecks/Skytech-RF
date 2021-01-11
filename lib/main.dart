@@ -65,17 +65,15 @@ class _LoadingState extends State<Loading> {
     await Firebase.initializeApp();
     var sub = await FirebaseFirestore.instance.collection('user').where('deviceId', isEqualTo: deviceID).get();
     var users = sub.docs;
-
     if(users.isNotEmpty){
       //innawa
-
       var sub2 = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: users[0]['code']).get();
       var companies = sub2.docs;
       Navigator.pushReplacement(
         context,
         CupertinoPageRoute(builder: (context) => DashBoard(
           deviceID: deviceID,
-          companyName: companies[0]['name'],
+          companyName: companies[0]['fname']+' '+companies[0]['lname'],
           id: users[0]['id'],
           name: users[0]['name'],
           code: companies[0]['code'],

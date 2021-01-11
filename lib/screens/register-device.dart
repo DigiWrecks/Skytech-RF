@@ -87,7 +87,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             ToastBar(color: Colors.green,text: 'Device Registered!').show();
             Navigator.pushReplacement(
               context,
-              CupertinoPageRoute(builder: (context) => DashBoard(name: name.text,deviceID: deviceID,id: id.text,companyName: companies[0]['name'],code: code.text,email: email.text,isLogged: false,lastTime: '0h 0min',)),
+              CupertinoPageRoute(builder: (context) => DashBoard(name: name.text,deviceID: deviceID,id: id.text,companyName: companies[0]['fname']+' '+companies[0]['lname'],code: code.text,email: email.text,isLogged: false,lastTime: '0h 0min',)),
             );
           }
           else{
