@@ -81,7 +81,7 @@ class _LoadingState extends State<Loading> {
           deviceID: deviceID,
           companyName: companies[0]['fname']+' '+companies[0]['lname'],
           id: users[0]['id'],
-          name: users[0]['name'],
+          name: users[0]['fname']+' '+users[0]['lname'],
           code: companies[0]['code'],
           companyEmail: companies[0]['email'],
           email: users[0]['email'],

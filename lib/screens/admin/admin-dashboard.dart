@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:intl/intl.dart';
 import 'package:skytech/screens/admin/settings.dart';
 import 'package:skytech/screens/admin/user-analytics.dart';
 import 'package:skytech/widgets/button.dart';
@@ -65,13 +64,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final CollectionReference collectionReference  = FirebaseFirestore.instance.collection("user");
     setState(() {
           if(location=="All"&&sorting=="name"){
-                getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('name',descending: true));
+                getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('fname',descending: true));
           }
           else if(location=="All"&&sorting=="date"){
             getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('timestamp',descending: true));
           }
           else if(location!="All"&&sorting=="name"){
-            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('name',descending: true));
+            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('fname',descending: true));
           }
           else if(location!="All"&&sorting=="date"){
             getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('timestamp',descending: true));
@@ -93,7 +92,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     getWorkingSites();
     sorting = "name";
-    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('name',descending: true).orderBy('logged', descending: true));
+    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('fname',descending: true));
 
   }
 
@@ -255,7 +254,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             itemCount: profiles.length,
                             physics: BouncingScrollPhysics(),
                             itemBuilder: (context,i){
-                              String name = profiles[i]['name'];
+                              String name = profiles[i]['fname']+' '+profiles[i]['lname'];
                               String email = profiles[i]['email'];
                               bool logged = profiles[i]['logged'];
                               return Padding(
@@ -310,9 +309,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
               ),
             ),
           ),
-
-
-
         ],
       ),
 

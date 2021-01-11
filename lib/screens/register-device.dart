@@ -20,7 +20,8 @@ class RegisterDevice extends StatefulWidget {
 
 class _RegisterDeviceState extends State<RegisterDevice> {
 
-  TextEditingController name = TextEditingController();
+  TextEditingController fname = TextEditingController();
+  TextEditingController lname = TextEditingController();
   TextEditingController code = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController id = TextEditingController();
@@ -48,7 +49,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
   registerDevice() async {
     await Firebase.initializeApp();
-    if(email.text!='' && id.text!='' && name.text!=''&& code.text!=''){
+    if(email.text!='' && id.text!='' && fname.text!=''&& lname.text!=''&&code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
 
       try{
@@ -70,7 +71,8 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               DateTime time = await NTP.now();
 
             await FirebaseFirestore.instance.collection('user').doc(email.text).set({
-              'name': name.text,
+              'fname': fname.text,
+              'lname': lname.text,
               'email': email.text,
               'code': code.text,
               'id': id.text,
@@ -90,7 +92,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             Navigator.pushReplacement(
               context,
               CupertinoPageRoute(builder: (context) => DashBoard(
-                name: name.text,
+                name: fname.text+' '+lname.text,
                 deviceID: deviceID,
                 id: id.text,
                 companyName: companies[0]['fname']+' '+companies[0]['lname'],
@@ -117,7 +119,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
                 deviceID: deviceID,
                 companyName: companies[0]['fname']+' '+companies[0]['lname'],
                 id: users[0]['id'],
-                name: users[0]['name'],
+                name: users[0]['fname']+' '+users[0]['lname'],
                 code: companies[0]['code'],
                 email: users[0]['email'],
                 isLogged: users[0]['logged'],
@@ -167,7 +169,8 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
                 CustomText(text: 'Register your device',size: ScreenUtil().setSp(60)),
 
-                InputField(hint: 'Name',controller: name,),
+                InputField(hint: 'First Name',controller: fname,),
+                InputField(hint: 'Last Name',controller: lname,),
                 InputField(hint: 'Email',type: TextInputType.emailAddress,controller: email,),
                 InputField(hint: 'ID Number',controller: id,),
                 InputField(hint: 'Company Code',controller: code,),
