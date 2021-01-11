@@ -4,16 +4,19 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:skytech/screens/admin/settings.dart';
 import 'package:skytech/screens/admin/user-analytics.dart';
+import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
 class AdminDashboard extends StatefulWidget {
 
-  final String name;
+  final String fname;
+  final String lname;
   final String code;
 
-  const AdminDashboard({Key key, this.name, this.code}) : super(key: key);
+  const AdminDashboard({Key key, this.fname, this.code, this.lname}) : super(key: key);
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -94,7 +97,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: CustomText(text: 'Profiles'),
+        title: CustomText(text: 'Dashboard'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(icon: Icon(Icons.settings), onPressed: (){
@@ -110,36 +113,81 @@ class _AdminDashboardState extends State<AdminDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: ScreenUtil().setHeight(20),),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-            child: CustomText(text: widget.name,size: ScreenUtil().setSp(70),align: TextAlign.start,),
-          ),
-          SizedBox(height: ScreenUtil().setHeight(30),),
-          Center(
-            child: Container(
-              height: ScreenUtil().setHeight(90),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: Color(0xff99A8B2),
-                  border: Border.all(color: Colors.white,width: 3)
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(16)),
-                child: DropdownButton(
-                  underline: Divider(color: Color(0xff99A8B2),height: 0,thickness: 0,),
-                  items: workingSiteList,
-                  onChanged:(newValue){
-                    setState(() {
-                      location = newValue;
-                      filterData();
-                    });
-                  },
-                  value: location,
+
+
+          ///name and export button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              SizedBox(
+                width: ScreenUtil().setWidth(400),
+                child: Padding(
+                  padding: EdgeInsets.only(left: ScreenUtil().setWidth(40)),
+                  child: CustomText(text: widget.fname+' '+widget.lname,size: ScreenUtil().setSp(40),align: TextAlign.start,isBold: false,color: Color(0xffE6D5B8),),
                 ),
               ),
+              ///exportButton
+              Expanded(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
+                  child: Button(color: Colors.white,text: 'Export CSV',onclick: (){},textColor: Colors.green,),
+                ),
+              )
+            ],
+          ),
+          SizedBox(height: ScreenUtil().setHeight(30),),
+
+
+          ///siteSelector and total hours
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  height: ScreenUtil().setHeight(90),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Color(0xff99A8B2),
+                      border: Border.all(color: Colors.white,width: 3)
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(16)),
+                    child: DropdownButton(
+                      underline: Divider(color: Color(0xff99A8B2),height: 0,thickness: 0,),
+                      items: workingSiteList,
+                      onChanged:(newValue){
+                        setState(() {
+                          location = newValue;
+                          filterData();
+                        });
+                      },
+                      value: location,
+                    ),
+                  ),
+                ),
+                ///totalHours
+                Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Color(0xff99A8B2),
+                      border: Border.all(color: Colors.white,width: 3)
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(ScreenUtil().setWidth(15)),
+                    child: Column(
+                      children: [
+                        CustomText(text: '1000 Hours',size: ScreenUtil().setSp(35),color: Colors.black,),
+                        CustomText(text: 'Total Working Time',isBold: false,size: ScreenUtil().setSp(25),color: Colors.black,),
+                      ],
+                    ),
+                  ),
+                )
+              ],
             ),
           ),
           SizedBox(height: ScreenUtil().setHeight(30),),
+          ///profiles
           Expanded(
             child: Padding(
               padding:  EdgeInsets.all(ScreenUtil().setWidth(40)),
@@ -156,21 +204,23 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomText(text: 'Profiles',color: Colors.black,size: ScreenUtil().setSp(40),),
+                          CustomText(text: 'Profiles',size: ScreenUtil().setSp(40),),
                           Container(
                             height: ScreenUtil().setHeight(70),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(40),
-                                color: Colors.white,
-                                border: Border.all(color: Colors.black,width: 3)
+                                color: Colors.black,
+                                border: Border.all(color: Colors.white,width: 3)
                             ),
                             child: Padding(
                               padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
                               child: DropdownButton(
-                                underline: Divider(color: Colors.white,height: 0,thickness: 0,),
+                                underline: Divider(color: Colors.black,height: 0,thickness: 0,),
+                                dropdownColor: Colors.black,
+
                                 items: <DropdownMenuItem> [
-                                  DropdownMenuItem(child: CustomText(text: "Sort by name",color: Colors.black,),value: "name",),
-                                  DropdownMenuItem(child: CustomText(text: "Sort by date",color: Colors.black,),value: "date",),
+                                  DropdownMenuItem(child: CustomText(text: "Sort by name",),value: "name",),
+                                  DropdownMenuItem(child: CustomText(text: "Sort by date",),value: "date",),
                                 ],
                                 onChanged:(newValue){
                                   setState(() {
@@ -206,7 +256,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   child: Container(
                                     width: double.infinity,
                                     decoration: BoxDecoration(
-                                        color: Color(0xffE6D5B8),
+                                        color: Theme.of(context).accentColor,
                                         borderRadius: BorderRadius.circular(15),
                                         border: Border.all(color: Colors.black,width: 3)
                                     ),
@@ -215,6 +265,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
+                                          CircleAvatar(
+                                            radius: 7,
+                                            backgroundColor: Colors.white,
+                                            child: CircleAvatar(
+                                              radius: 5,
+                                              backgroundColor: Colors.green,
+                                            ),
+                                          ),
                                           Flexible(
                                             child: Padding(
                                               padding: EdgeInsets.all(ScreenUtil().setHeight(20)),

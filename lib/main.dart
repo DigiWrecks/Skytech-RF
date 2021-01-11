@@ -23,9 +23,9 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        scaffoldBackgroundColor: Color(0xff002F3F),
-        primaryColor: Colors.black,
-        accentColor: Colors.amber,
+        scaffoldBackgroundColor: Color(0xff4E5A5E),
+        primaryColor: Color(0xff1C2B2D),
+        accentColor: Color(0xff91C3E8),
         textTheme: GoogleFonts.ubuntuTextTheme(
           Theme.of(context).textTheme,
         ),

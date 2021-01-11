@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
@@ -17,6 +18,8 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   TextEditingController newLocation = TextEditingController();
+  TextEditingController lat = TextEditingController();
+  TextEditingController long = TextEditingController();
 
   popUpCard(BuildContext context) async {
     showDialog(
@@ -27,8 +30,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: Colors.white,
           title: CustomText(text: 'Add new Location',align: TextAlign.center,color: Colors.black,),
           content: Container(
-            height: ScreenUtil().setHeight(280),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
                 TextField(
                   cursorColor: Colors.black,
@@ -42,6 +45,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   ),
                   controller: newLocation,
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  cursorColor: Colors.black,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    hintText: 'Latitude',
+                    enabledBorder:UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 2),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 5),
+                    ),
+                  ),
+                  controller: lat,
+                ),
+                SizedBox(height: 20,),
+                TextField(
+                  cursorColor: Colors.black,
+                  keyboardType: TextInputType.name,
+                  decoration: InputDecoration(
+                    hintText: 'Longitude',
+                    enabledBorder:UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 2),
+                    ),
+                    focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 5),
+                    ),
+                  ),
+                  controller: long,
+                ),
+                SizedBox(height: 20,),
+                Padding(
+                  padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
+                  child: Button(text: 'Fetch',color: Colors.amber,onclick: () async {
+                    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                    setState(() {
+                      lat.text = position.latitude.toString();
+                      long.text = position.longitude.toString();
+                    });
+                  }),
                 ),
                 Padding(
                   padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
@@ -97,7 +141,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       floatingActionButton: FloatingActionButton(
         onPressed: ()=>popUpCard(context),
         child: Icon(Icons.add),
-        backgroundColor: Color(0xffE6D5B8),
+        backgroundColor: Theme.of(context).accentColor,
         elevation: 9,
 
       ),
@@ -106,6 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
         child: Column(
           children: [
+            ///companyCode
             Padding(
               padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
               child: CustomText(text: 'Company Code',size: ScreenUtil().setSp(35),),
@@ -122,10 +167,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ),
 
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
-              child: CustomText(text: 'Work Sites',size: ScreenUtil().setSp(35),),
+            ///title of workTime and workStie
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
+                  child: CustomText(text: 'Work Sites',size: ScreenUtil().setSp(35),),
+                ),
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
+                  child: CustomText(text: 'Work Time',size: ScreenUtil().setSp(35),),
+                ),
+              ],
             ),
+
+            ///listviews
             Expanded(
               child: workSitesList!=null?ListView.builder(
                 itemCount: locationList.length,
@@ -134,29 +191,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   String location = locationList[i];
                   return Padding(
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
-                    child: Container(
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10)
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Flexible(
-                            child: Padding(
-                              padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                              child: CustomText(text: location,color: Colors.black,size: ScreenUtil().setSp(30),),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                                    child: CustomText(text: location,color: Colors.black,size: ScreenUtil().setSp(30),),
+                                  ),
+                                ),
+                                IconButton(icon: Icon(Icons.delete), onPressed: () async {
+                                        locationList.removeAt(i);
+                                        await FirebaseFirestore.instance.collection('admin').doc(workSitesList[0]['email']).update({
+                                          'sites': locationList
+                                        });
+                                })
+                              ],
                             ),
                           ),
-                          IconButton(icon: Icon(Icons.delete), onPressed: () async {
-                                  locationList.removeAt(i);
-                                  await FirebaseFirestore.instance.collection('admin').doc(workSitesList[0]['email']).update({
-                                    'sites': locationList
-                                  });
-                          })
-                        ],
-                      ),
+                        ),
+                        SizedBox(width: ScreenUtil().setWidth(20),),
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            height: ScreenUtil().setHeight(95),
+                            decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10)
+                            ),
+                            child: Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                                child: CustomText(text: '1000 Hours',color: Colors.black,size: ScreenUtil().setSp(30),),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   );
                 },

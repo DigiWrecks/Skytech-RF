@@ -20,12 +20,7 @@ class SelectUser extends StatelessWidget {
               padding:  EdgeInsets.all(ScreenUtil().setHeight(80)),
               child: Image.asset('images/logo.png'),
             ),
-            SizedBox(height: ScreenUtil().setHeight(50),),
-            Padding(
-              padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
-              child: CustomText(text: 'Profile Not Found',size: ScreenUtil().setSp(50),),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(50),),
+            SizedBox(height: ScreenUtil().setHeight(150),),
             Padding(
               padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
               child: Container(
@@ -35,7 +30,12 @@ class SelectUser extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    SizedBox(height: ScreenUtil().setHeight(100),),
+                    SizedBox(height: ScreenUtil().setHeight(70),),
+                    Padding(
+                      padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
+                      child: CustomText(text: 'Device Not Found',size: ScreenUtil().setSp(50),),
+                    ),
+                    SizedBox(height: ScreenUtil().setHeight(70),),
                     Padding(
                       padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50)),
                       child: Button(text: 'Admin Login',color: Colors.white,textColor: Colors.black,onclick: (){

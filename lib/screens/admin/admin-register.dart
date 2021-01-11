@@ -18,7 +18,8 @@ class AdminRegister extends StatefulWidget {
 class _AdminRegisterState extends State<AdminRegister> {
 
   TextEditingController email = TextEditingController();
-  TextEditingController name = TextEditingController();
+  TextEditingController fname = TextEditingController();
+  TextEditingController lname = TextEditingController();
   TextEditingController password = TextEditingController();
   TextEditingController code = TextEditingController();
 
@@ -33,7 +34,7 @@ class _AdminRegisterState extends State<AdminRegister> {
 
   signUp() async {
     await Firebase.initializeApp();
-    if(email.text!='' && password.text!='' && name.text!=''&& code.text!=''){
+    if(email.text!='' && password.text!='' && fname.text!=''&& lname.text!=''&& code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
 
       var sub = await FirebaseFirestore.instance.collection('codes').where('code',isEqualTo: code.text).get();
@@ -47,7 +48,8 @@ class _AdminRegisterState extends State<AdminRegister> {
 
           try{
             await FirebaseFirestore.instance.collection('admin').doc(email.text).set({
-              'name': name.text,
+              'fname': fname.text,
+              'lname': lname.text,
               'email': email.text,
               'code': code.text,
               'sites': [],
@@ -55,7 +57,8 @@ class _AdminRegisterState extends State<AdminRegister> {
               'devices': []
             });
 
-            name.clear();
+            fname.clear();
+            lname.clear();
             email.clear();
             password.clear();
             code.clear();
@@ -106,7 +109,8 @@ class _AdminRegisterState extends State<AdminRegister> {
 
                 CustomText(text: 'Sign Up',size: ScreenUtil().setSp(60)),
 
-                InputField(hint: 'Name',controller: name,),
+                InputField(hint: 'First Name',controller: fname,),
+                InputField(hint: 'Last Name',controller: lname,),
                 InputField(hint: 'Email',type: TextInputType.emailAddress,controller: email,),
                 InputField(hint: 'Password',ispassword: true,controller: password,),
                 InputField(hint: 'Company Code',controller: code,),

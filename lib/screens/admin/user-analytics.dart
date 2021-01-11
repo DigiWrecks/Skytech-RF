@@ -242,6 +242,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                         padding:  EdgeInsets.all(ScreenUtil().setHeight(25)),
                         child: Column(
                           children: [
+                            ///date
                             Row(
                               children: [
                                 Icon(Icons.calendar_today,size: 25,),
@@ -250,21 +251,24 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                               ],
                             ),
                             SizedBox(height: ScreenUtil().setHeight(20),),
+
+                            ///blueBox
                             Container(
                               decoration: BoxDecoration(
-                                color: Color(0xffE6D5B8),
+                                color: Theme.of(context).accentColor,
                                 borderRadius: BorderRadius.circular(15),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  ///login andd logout time
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Container(
                                           decoration: BoxDecoration(
-                                              color: Colors.grey,
+                                              color: Color(0xffc4c4c4),
                                               borderRadius: BorderRadius.only(topLeft: Radius.circular(10)),
                                               border: Border.all(color: Colors.white,width: 3)
                                           ),
@@ -299,7 +303,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                       Expanded(
                                         child: Container(
                                           decoration: BoxDecoration(
-                                              color: Colors.grey,
+                                              color: Color(0xffc4c4c4),
                                               borderRadius: BorderRadius.only(topRight: Radius.circular(10)),
                                               border: Border.all(color: Colors.white,width: 3)
                                           ),
@@ -333,74 +337,173 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                       ),
                                     ],
                                   ),
+                                  ///lat and long
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).accentColor,
+                                              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10)),
+                                              border: Border.all(color: Colors.white,width: 3)
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    CustomText(text: 'Latitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    SizedBox(width: ScreenUtil().setWidth(10),),
+                                                    Expanded(
+                                                      child: TextField(
+                                                        controller: latEdit,
+                                                        cursorColor: Colors.black,
+                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
+                                                        decoration: InputDecoration(
+                                                          hintText: '6.11111',
+                                                          enabledBorder:InputBorder.none,
+                                                          focusedBorder: InputBorder.none,
+                                                        ),
+                                                        onSubmitted: (x) async {
+                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                            'login': x,
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    CustomText(text: 'Longitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    SizedBox(width: ScreenUtil().setWidth(10),),
+                                                    Expanded(
+                                                      child: TextField(
+                                                        controller: longEdit,
+                                                        cursorColor: Colors.black,
+                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
+                                                        decoration: InputDecoration(
+                                                          hintText: '6.11111',
+                                                          enabledBorder:InputBorder.none,
+                                                          focusedBorder: InputBorder.none,
+                                                        ),
+                                                        onSubmitted: (x) async {
+                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                            'login': x,
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Theme.of(context).accentColor,
+                                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(10)),
+                                              border: Border.all(color: Colors.white,width: 3)
+                                          ),
+                                          child: Padding(
+                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                            child: Column(
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    CustomText(text: 'Latitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    SizedBox(width: ScreenUtil().setWidth(10),),
+                                                    Expanded(
+                                                      child: TextField(
+                                                        controller: latEdit,
+                                                        cursorColor: Colors.black,
+                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
+                                                        decoration: InputDecoration(
+                                                          hintText: '6.11111',
+                                                          enabledBorder:InputBorder.none,
+                                                          focusedBorder: InputBorder.none,
+                                                        ),
+                                                        onSubmitted: (x) async {
+                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                            'login': x,
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    CustomText(text: 'Longitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    SizedBox(width: ScreenUtil().setWidth(10),),
+                                                    Expanded(
+                                                      child: TextField(
+                                                        controller: longEdit,
+                                                        cursorColor: Colors.black,
+                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
+                                                        decoration: InputDecoration(
+                                                          hintText: '6.11111',
+                                                          enabledBorder:InputBorder.none,
+                                                          focusedBorder: InputBorder.none,
+                                                        ),
+                                                        onSubmitted: (x) async {
+                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                            'login': x,
+                                                          });
+                                                        },
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
 
-                                  Padding(
-                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
-                                    child: Row(
-                                      children: [
-                                        CustomText(text: 'Latitude :',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                        SizedBox(width: ScreenUtil().setWidth(10),),
-                                        Expanded(
-                                          child: TextField(
-                                            controller: latEdit,
-                                            cursorColor: Colors.black,
-                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                            decoration: InputDecoration(
-                                              hintText: '6.541234',
-                                              enabledBorder:InputBorder.none,
-                                              focusedBorder: InputBorder.none,
-                                            ),
-                                            onSubmitted: (x) async {
-                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                'lat': x,
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(20)),
-                                    child: Row(
-                                      children: [
-                                        CustomText(text: 'Longitude :',size: ScreenUtil().setSp(35),color: Colors.black,),
-                                        SizedBox(width: ScreenUtil().setWidth(10),),
-                                        Expanded(
-                                          child: TextField(
-                                            controller: longEdit,
-                                            cursorColor: Colors.black,
-                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(35)),
-                                            decoration: InputDecoration(
-                                              hintText: '6.541234',
-                                              enabledBorder:InputBorder.none,
-                                              focusedBorder: InputBorder.none,
-                                            ),
-                                            onSubmitted: (x) async {
-                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                'long': x,
-                                              });
-                                            },
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
                                   SizedBox(height: ScreenUtil().setHeight(25),),
+                                  ///location
                                   Padding(
                                     padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
                                     child: CustomText(text: 'Location : $location',size: ScreenUtil().setSp(35),color: Colors.black,),
                                   ),
                                   SizedBox(height: ScreenUtil().setHeight(45),),
+                                  ///workedTime
                                   Padding(
                                     padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
                                     child: CustomText(text: 'Worked Time : $worked',size: ScreenUtil().setSp(35),color: Colors.black,),
                                   ),
-                                  
                                   SizedBox(height: ScreenUtil().setHeight(30),)
                                 ],
                               ),
                             ),
+
+                            ///NoteText
+                            SizedBox(height: ScreenUtil().setHeight(20),),
+                            Align(
+                                alignment: Alignment.topLeft,
+                                child: CustomText(text: 'Note',size: ScreenUtil().setSp(40),color: Colors.black,)),
+
+                            ///Note
+                            SizedBox(height: ScreenUtil().setHeight(20),),
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10)
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
+                                child: CustomText(text: 'The note that typed by the worker and use newmetro enfield to disclouser this matter',color: Colors.black,size: ScreenUtil().setSp(35),),
+                              ),
+                            )
                           ],
                         ),
                       ),

@@ -36,7 +36,7 @@ class _AdminLoginState extends State<AdminLogin> {
       if(logged.isNotEmpty){
         Navigator.pushReplacement(
           context,
-          CupertinoPageRoute(builder: (context) => AdminDashboard(name: logged[0]['name'],code: logged[0]['code'],)),
+          CupertinoPageRoute(builder: (context) => AdminDashboard(fname: logged[0]['fname'],lname: logged[0]['lname'], code: logged[0]['code'],)),
         );
       }
 
