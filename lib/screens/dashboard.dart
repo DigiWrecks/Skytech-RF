@@ -50,6 +50,7 @@ class _DashBoardState extends State<DashBoard> {
     });
   }
 
+
   getDate() async {
     DateTime now = await NTP.now();
     setState(() {
@@ -447,21 +448,44 @@ class _DashBoardState extends State<DashBoard> {
                         actions: [
                           FlatButton(onPressed: () async {
                             ToastBar(text: 'Please wait...', color: Colors.orange).show();
-                            await getWorkingSites();
-                            if(location!=null){
-                              if(!logged){
-                                onLoginPressed();
-                                Navigator.pop(context);
-                              }else{
-                                Navigator.pop(context);
-                                notePopUp(context);
+                            bool isLocationServiceEnabled  = await Geolocator.isLocationServiceEnabled();
+                            if(isLocationServiceEnabled){
+                              LocationPermission permission = await Geolocator.checkPermission();
+                             // print(permission);
+                              if(permission==LocationPermission.deniedForever){
+                                ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
+                                await Geolocator.openAppSettings();
                               }
-                            }
-                            else{
-                              ToastBar(text: 'You are not within the work site!', color: Colors.red).show();
+                              else if(permission == LocationPermission.denied){
+                                ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
+                                LocationPermission perm = await Geolocator.requestPermission();
+                                if(perm==LocationPermission.deniedForever){
+                                  ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
+                                  await Geolocator.openAppSettings();
+                                }
+                              }
+                              else{
+                                await getWorkingSites();
+                                if(location!=null){
+                                  if(!logged){
+                                    onLoginPressed();
+                                    Navigator.pop(context);
+                                  }else{
+                                    Navigator.pop(context);
+                                    notePopUp(context);
+                                  }
+                                }
+                                else{
+                                  ToastBar(text: 'You are not within the work site!', color: Colors.red).show();
+                                }
+                              }
+                            }else{
+                              ToastBar(text: 'Please enable location service for continue', color: Colors.red).show();
+                              await Geolocator.openLocationSettings();
                             }
 
-                            }, child: CustomText(text: 'Yes',color: Colors.black,)),
+
+                          }, child: CustomText(text: 'Yes',color: Colors.black,)),
                           FlatButton(onPressed: () async {
                             Navigator.pop(context);
                           }, child: CustomText(text: 'No',color: Colors.black,)),
