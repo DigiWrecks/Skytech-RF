@@ -89,7 +89,16 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             ToastBar(color: Colors.green,text: 'Device Registered!').show();
             Navigator.pushReplacement(
               context,
-              CupertinoPageRoute(builder: (context) => DashBoard(name: name.text,deviceID: deviceID,id: id.text,companyName: companies[0]['fname']+' '+companies[0]['lname'],code: code.text,email: email.text,isLogged: false,lastTime: '0h 0min',companyEmail: companyEmail,)),
+              CupertinoPageRoute(builder: (context) => DashBoard(
+                name: name.text,
+                deviceID: deviceID,
+                id: id.text,
+                companyName: companies[0]['fname']+' '+companies[0]['lname'],
+                code: code.text,
+                email: email.text,
+                isLogged: false,
+                lastTime: '0h 0min',
+                companyEmail: companyEmail,)),
             );
           }
           else{
@@ -104,7 +113,17 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             ToastBar(color: Colors.green,text: 'Device Updated!').show();
             Navigator.pushReplacement(
               context,
-              CupertinoPageRoute(builder: (context) => DashBoard(deviceID: deviceID,companyName: companies[0]['name'],id: users[0]['id'],name: users[0]['name'],code: companies[0]['code'],email: users[0]['email'],isLogged: users[0]['logged'],lastTime: users[0]['lastTime'],)),
+              CupertinoPageRoute(builder: (context) => DashBoard(
+                deviceID: deviceID,
+                companyName: companies[0]['fname']+' '+companies[0]['lname'],
+                id: users[0]['id'],
+                name: users[0]['name'],
+                code: companies[0]['code'],
+                email: users[0]['email'],
+                isLogged: users[0]['logged'],
+                lastTime: users[0]['lastTime'],
+                companyEmail: companies[0]['email'],
+              )),
             );
           }
           else{

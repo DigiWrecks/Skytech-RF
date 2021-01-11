@@ -70,12 +70,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
         var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
         int mins = durInMins - durInHours*60;
         // print(durInHours.toString()+" h "+mins.toString()+" min");
-        int newTotalMins = widget.totalMins + durInMins;
 
-        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
           'logout': time,
-          'logoutLat': 0,
-          'logoutLong': 0,
+          'logoutLat': "0",
+          'logoutLong': "0",
           'notes': '',
           'worked': durInHours.toString()+" h "+mins.toString()+" min"
         });
@@ -85,9 +84,20 @@ class _UserAnalyticsState extends State<UserAnalytics> {
           'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
         });
 
-      await FirebaseFirestore.instance.collection('admin').doc(widget.adminEmail).collection('sites').doc(widget.workSite).update({
-        'total': newTotalMins,
-      });
+        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).get().then((value) async {
+          var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.adminEmail).collection('sites').where('site', isEqualTo: value['location']).get();
+          var site  = sub.docs;
+          if(site.isNotEmpty){
+            int total = site[0]['total'];
+            total = total+durInMins;
+            await FirebaseFirestore.instance.collection('admin').doc(widget.adminEmail).collection('sites').doc(value['location']).update({
+              'total': total,
+            });
+          }
+        });
+
+
+
 
         setState(() {
           logged = false;
@@ -95,7 +105,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
         ToastBar(color: Colors.green,text: 'Logged out!').show();
     }
     catch(e){
-      ToastBar(color: Colors.red,text: 'Somethings went wrong!').show();
+      ToastBar(color: Colors.red,text: e.toString()).show();
     }
   }
 
@@ -247,7 +257,6 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                   String worked = logs[i]['worked'];
                   String date = logs[i]['date'];
                   String note = logs[i]['notes'];
-
                   return Padding(
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
                     child: Container(

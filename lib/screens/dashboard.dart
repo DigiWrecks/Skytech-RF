@@ -32,8 +32,8 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
-  String lat = "N/A";
-  String long = "N/A";
+  String lat = "0";
+  String long = "0";
   String date = "N/A";
   String location = "Fetching";
   bool logged;
@@ -59,7 +59,7 @@ class _DashBoardState extends State<DashBoard> {
 
   getWorkingSites() async {
     await Firebase.initializeApp();
-    await getLocation();
+    getLocation();
     var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').get();
     var workingSites = sub.docs;
     for(int i=0;i<workingSites.length;i++){
@@ -107,14 +107,15 @@ class _DashBoardState extends State<DashBoard> {
       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).set({
             'timestamp': timestamp,
             'loginLat': lat,
-            'logooutLat': 'n/a',
+            'logoutLat': '0',
             'loginLong': long,
-            'logoutLong': 'n/a',
+            'logoutLong': '0',
             'location': location,
             'date': date,
             'login': time,
             'logout': 'n/a',
             'worked': 'n/a',
+            'notes': ''
 
       });
 
