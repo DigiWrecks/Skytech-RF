@@ -68,8 +68,10 @@ class _LogState extends State<Log> {
           itemCount: logs.length,
           itemBuilder: (context,i){
             String date = logs[i]['date'];
-            String lat = logs[i]['lat'];
-            String long = logs[i]['long'];
+            String logInlat = logs[i]['loginLat'];
+            String logOutlat = logs[i]['logoutLat'];
+            String logInlong = logs[i]['loginLong'];
+            String logOutlong = logs[i]['logoutLong'];
             String login = logs[i]['login'];
             String logout = logs[i]['logout'];
             String location = logs[i]['location'];
@@ -149,11 +151,11 @@ class _LogState extends State<Log> {
                                       children: [
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Latitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Latitude : ${(double.parse(logInlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Longitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Longitude : ${(double.parse(logInlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                       ],
                                     ),
@@ -169,11 +171,11 @@ class _LogState extends State<Log> {
                                       children: [
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Latitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Latitude : ${(double.parse(logOutlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Longitude : 6.12345',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Longitude : ${(double.parse(logOutlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                       ],
                                     ),

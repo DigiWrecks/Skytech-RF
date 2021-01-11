@@ -6,12 +6,14 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/toast.dart';
 
 
 class SettingsScreen extends StatefulWidget {
 
   final String code;
-  const SettingsScreen({Key key, this.code}) : super(key: key);
+  final String email;
+  const SettingsScreen({Key key, this.code, this.email}) : super(key: key);
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -30,74 +32,93 @@ class _SettingsScreenState extends State<SettingsScreen> {
           backgroundColor: Colors.white,
           title: CustomText(text: 'Add new Location',align: TextAlign.center,color: Colors.black,),
           content: Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: 'Enter New Location',
-                    enabledBorder:UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    cursorColor: Colors.black,
+                    decoration: InputDecoration(
+                      hintText: 'Enter New Location',
+                      enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                      ),
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 5),
-                    ),
+                    controller: newLocation,
                   ),
-                  controller: newLocation,
-                ),
-                SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.black,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: 'Latitude',
-                    enabledBorder:UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
+                  SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.black,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: 'Latitude',
+                      enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                      ),
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 5),
-                    ),
+                    controller: lat,
                   ),
-                  controller: lat,
-                ),
-                SizedBox(height: 20,),
-                TextField(
-                  cursorColor: Colors.black,
-                  keyboardType: TextInputType.name,
-                  decoration: InputDecoration(
-                    hintText: 'Longitude',
-                    enabledBorder:UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
+                  SizedBox(height: 20,),
+                  TextField(
+                    cursorColor: Colors.black,
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      hintText: 'Longitude',
+                      enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                      ),
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 5),
-                    ),
+                    controller: long,
                   ),
-                  controller: long,
-                ),
-                SizedBox(height: 20,),
-                Padding(
-                  padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
-                  child: Button(text: 'Fetch',color: Colors.amber,onclick: () async {
-                    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-                    setState(() {
-                      lat.text = position.latitude.toString();
-                      long.text = position.longitude.toString();
-                    });
-                  }),
-                ),
-                Padding(
-                  padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                  child: Button(text: 'Add',color: Colors.red,onclick: () async {
-                    locationList.add(newLocation.text);
-                    await FirebaseFirestore.instance.collection('admin').doc(workSitesList[0]['email']).update({
-                      'sites': locationList
-                    });
-                    Navigator.pop(context);
-                  }),
-                ),
-              ],
+                  SizedBox(height: 20,),
+                  Padding(
+                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
+                    child: Button(text: 'Fetch',color: Colors.amber,onclick: () async {
+                      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                      setState(() {
+                        lat.text = position.latitude.toString();
+                        long.text = position.longitude.toString();
+                      });
+                    }),
+                  ),
+                  Padding(
+                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+                    child: Button(text: 'Add',color: Colors.red,onclick: () async {
+                      if(newLocation.text.isNotEmpty && lat.text.isNotEmpty && long.text.isNotEmpty){
+                        locationList.add(newLocation.text);
+                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
+                          'sites': locationList
+                        });
+                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(newLocation.text).set(
+                            {
+                              'site': newLocation.text,
+                              'lat': double.parse(lat.text),
+                              'long': double.parse(long.text),
+                              'total': 0
+                            }
+                        );
+                        lat.clear();
+                        long.clear();
+                        newLocation.clear();
+                        Navigator.pop(context);
+                      }
+                      else{
+                        ToastBar(text: "Please fill all the fields",color: Colors.red).show();
+                      }
+
+                    }),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -109,14 +130,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   List<DocumentSnapshot> workSitesList;
   StreamSubscription<QuerySnapshot> subscription;
   List locationList = [];
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    subscription = collectionReference.where('code', isEqualTo: widget.code).snapshots().listen((datasnapshot){
+    subscription = collectionReference.doc(widget.email).collection('sites').snapshots().listen((datasnapshot){
       setState(() {
+        locationList.clear();
         workSitesList = datasnapshot.docs;
-        locationList = workSitesList[0]['sites'];
+        workSitesList.forEach((element) {
+          locationList.add(element['site']);
+        });
       });
     });
   }
@@ -185,11 +210,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ///listviews
             Expanded(
               child: workSitesList!=null?ListView.builder(
-                itemCount: locationList.length,
+                itemCount: workSitesList.length,
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context,i){
-                  String location = locationList[i];
+                  String location = workSitesList[i]['site'];
+                  String hours = workSitesList[i]['total'].toString();
                   return Padding(
+                    key: UniqueKey(),
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -211,10 +238,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                 ),
                                 IconButton(icon: Icon(Icons.delete), onPressed: () async {
-                                        locationList.removeAt(i);
-                                        await FirebaseFirestore.instance.collection('admin').doc(workSitesList[0]['email']).update({
+                                        locationList.remove(location);
+                                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
                                           'sites': locationList
                                         });
+                                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(location).delete();
                                 })
                               ],
                             ),
@@ -232,7 +260,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Center(
                               child: Padding(
                                 padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                                child: CustomText(text: '1000 Hours',color: Colors.black,size: ScreenUtil().setSp(30),),
+                                child: CustomText(text: '$hours Hours',color: Colors.black,size: ScreenUtil().setSp(30),),
                               ),
                             ),
                           ),
@@ -241,7 +269,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                   );
                 },
-              ):CircularProgressIndicator(),
+              ):Center(child: CircularProgressIndicator()),
             )
           ],
         ),

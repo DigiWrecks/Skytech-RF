@@ -22,9 +22,10 @@ class DashBoard extends StatefulWidget {
   final String email;
   final bool isLogged;
   final String lastTime;
+  final String companyEmail;
 
 
-  const DashBoard({Key key, this.name, this.id, this.companyName, this.deviceID, this.code, this.email, this.isLogged=true, this.lastTime}) : super(key: key);
+  const DashBoard({Key key, this.name, this.id, this.companyName, this.deviceID, this.code, this.email, this.isLogged=true, this.lastTime, this.companyEmail}) : super(key: key);
 
   @override
   _DashBoardState createState() => _DashBoardState();
@@ -34,11 +35,12 @@ class _DashBoardState extends State<DashBoard> {
   String lat = "N/A";
   String long = "N/A";
   String date = "N/A";
-  String location;
-  List<DropdownMenuItem<String>> workingSiteList = [];
+  String location = "Fetching";
   bool logged;
   String lastTime;
   double distance;
+
+  int totalMins;
 
   getLocation() async {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
@@ -57,15 +59,26 @@ class _DashBoardState extends State<DashBoard> {
 
   getWorkingSites() async {
     await Firebase.initializeApp();
-    var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: widget.code).get();
+    await getLocation();
+    var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').get();
     var workingSites = sub.docs;
-    location = workingSites[0]['sites'][0];
-    for(int i=0;i<workingSites[0]['sites'].length;i++){
-      setState(() {
-        workingSiteList.add(
-          DropdownMenuItem(child: CustomText(text:workingSites[0]['sites'][i],color: Colors.black,),value: workingSites[0]['sites'][i],),
-        );
-      });
+    for(int i=0;i<workingSites.length;i++){
+      double latOfSite = workingSites[i]['lat'];
+      double longOfSite = workingSites[i]['long'];
+      double distance = Geolocator.distanceBetween(latOfSite, longOfSite, double.parse(lat), double.parse(long));
+      print(distance);
+      if(distance < 100){
+        setState(() {
+          location = workingSites[i]['site'];
+          totalMins = workingSites[i]['total'];
+        });
+        break;
+      }
+      else{
+        setState(() {
+          location = null;
+        });
+      }
     }
   }
 
@@ -76,6 +89,7 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   onLoginPressed() async {
+    print('entering login');
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
       DateTime now = await NTP.now();
@@ -92,13 +106,16 @@ class _DashBoardState extends State<DashBoard> {
 
       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).set({
             'timestamp': timestamp,
-            'lat': lat,
-            'long': long,
+            'loginLat': lat,
+            'logooutLat': 'n/a',
+            'loginLong': long,
+            'logoutLong': 'n/a',
             'location': location,
             'date': date,
             'login': time,
             'logout': 'n/a',
-            'worked': 'n/a'
+            'worked': 'n/a',
+
       });
 
       await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
@@ -117,8 +134,9 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  onLogoutPressed() async {
+  onLogoutPressed(String note) async {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
+
     try{
 
       var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
@@ -128,7 +146,7 @@ class _DashBoardState extends State<DashBoard> {
 
       var sub2 = await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').where('timestamp', isEqualTo: timestamp).get();
       var locations = sub2.docs;
-      calculateDistance(sLat: double.parse(locations[0]['lat']),sLong: double.parse(locations[0]['long']));
+      calculateDistance(sLat: double.parse(locations[0]['loginLat']),sLong: double.parse(locations[0]['loginLong']));
      print('distance is'+distance.toString());
 
      if(distance<76){
@@ -138,9 +156,14 @@ class _DashBoardState extends State<DashBoard> {
        var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
        int mins = durInMins - durInHours*60;
        // print(durInHours.toString()+" h "+mins.toString()+" min");
+        totalMins += durInMins;
+
 
        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
          'logout': time,
+         'logoutLat': lat,
+         'logoutLong': long,
+         'notes': note,
          'worked': durInHours.toString()+" h "+mins.toString()+" min"
        });
 
@@ -149,11 +172,16 @@ class _DashBoardState extends State<DashBoard> {
          'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
        });
 
+       await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').doc(location).update({
+         'total': totalMins,
+       });
+
        setState(() {
          logged = false;
          lastTime = durInHours.toString()+" h "+mins.toString()+" min";
        });
        ToastBar(color: Colors.green,text: 'Logged out!').show();
+       Navigator.pop(context);
      }
      else{
        ToastBar(color: Colors.red,text: 'You must within the range of 250ft from your logged in location!').show();
@@ -161,13 +189,12 @@ class _DashBoardState extends State<DashBoard> {
 
     }
     catch(e){
-      ToastBar(color: Colors.red,text: "Something went wrong!").show();
+      ToastBar(color: Colors.red,text: e.toString()).show();
     }
   }
 
   notePopUp(BuildContext context) async {
     TextEditingController note = TextEditingController();
-    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -196,8 +223,7 @@ class _DashBoardState extends State<DashBoard> {
                   padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
                   child: Button(text: 'Submit',color: Colors.green,onclick: () async {
                     if(note.text.isNotEmpty){
-                      onLogoutPressed();
-                      Navigator.pop(context);
+                      onLogoutPressed(note.text);
                     }
                     else{
                       ToastBar(text: 'Please fill the note',color: Colors.red).show();
@@ -216,8 +242,8 @@ class _DashBoardState extends State<DashBoard> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getLocation();
     getDate();
+    getLocation();
     getWorkingSites();
     logged = widget.isLogged;
     lastTime = widget.lastTime;
@@ -308,7 +334,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: lat,color: Colors.black,size: ScreenUtil().setSp(28),),
+                            child: CustomText(text: (double.parse(lat)).toStringAsFixed(5),color: Colors.black,size: ScreenUtil().setSp(28),),
                           ),
                         ),
                       ),
@@ -325,7 +351,7 @@ class _DashBoardState extends State<DashBoard> {
                           ),
                           child: Padding(
                             padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: long,color: Colors.black,size: ScreenUtil().setSp(28),),
+                            child: CustomText(text: (double.parse(long)).toStringAsFixed(5),color: Colors.black,size: ScreenUtil().setSp(28),),
                           ),
                         ),
                       ),
@@ -375,23 +401,34 @@ class _DashBoardState extends State<DashBoard> {
             Visibility(
               visible: !logged,
               child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Color(0xff99A8B2),
-                    border: Border.all(color: Colors.white,width: 3)
-                  ),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(16)),
-                    child: DropdownButton(
-                      underline: Divider(color: Color(0xff99A8B2),height: 0,thickness: 0,),
-                      items: workingSiteList,
-                      onChanged:(newValue){
-                        setState(() {
-                          location = newValue;
-                        });
-                      },
-                      value: location,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(50)),
+                  child: Container(
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Color(0xff99A8B2),
+                      border: Border.all(color: Colors.white,width: 3)
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.all(ScreenUtil().setWidth(10)),
+                      child: Row(
+                        children: [
+                          SizedBox(width: ScreenUtil().setWidth(20)),
+                          Expanded(
+                            child: SizedBox(
+                                child: CustomText(text: location!=null?location:'You are not within the work site!',size: ScreenUtil().setSp(35),)),
+                          ),
+                          IconButton(
+                            onPressed: (){
+                              setState(() {
+                                location = "Fetching";
+                              });
+                              getWorkingSites();
+                            },
+                            icon: Icon(Icons.refresh),
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -407,14 +444,22 @@ class _DashBoardState extends State<DashBoard> {
                       return AlertDialog(
                         content: CustomText(text: 'Are you sure you want to ${!logged?'log in':'log out'}?',color: Colors.black,),
                         actions: [
-                          FlatButton(onPressed: (){
-                            if(!logged){
-                              onLoginPressed();
-                              Navigator.pop(context);
-                            }else{
-                              Navigator.pop(context);
-                              notePopUp(context);
+                          FlatButton(onPressed: () async {
+                            ToastBar(text: 'Please wait...', color: Colors.orange).show();
+                            await getWorkingSites();
+                            if(location!=null){
+                              if(!logged){
+                                onLoginPressed();
+                                Navigator.pop(context);
+                              }else{
+                                Navigator.pop(context);
+                                notePopUp(context);
+                              }
                             }
+                            else{
+                              ToastBar(text: 'You are not within the work site!', color: Colors.red).show();
+                            }
+
                             }, child: CustomText(text: 'Yes',color: Colors.black,)),
                           FlatButton(onPressed: () async {
                             Navigator.pop(context);

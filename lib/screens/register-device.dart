@@ -44,6 +44,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
   List userList = [];
   List deviceList = [];
+  String companyEmail;
 
   registerDevice() async {
     await Firebase.initializeApp();
@@ -62,6 +63,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
           if(companies.isNotEmpty){
               userList = companies[0]['users'];
               deviceList = companies[0]['devices'];
+              companyEmail = companies[0]['email'];
               userList.add(email.text);
               deviceList.add(deviceID);
 
@@ -87,7 +89,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             ToastBar(color: Colors.green,text: 'Device Registered!').show();
             Navigator.pushReplacement(
               context,
-              CupertinoPageRoute(builder: (context) => DashBoard(name: name.text,deviceID: deviceID,id: id.text,companyName: companies[0]['fname']+' '+companies[0]['lname'],code: code.text,email: email.text,isLogged: false,lastTime: '0h 0min',)),
+              CupertinoPageRoute(builder: (context) => DashBoard(name: name.text,deviceID: deviceID,id: id.text,companyName: companies[0]['fname']+' '+companies[0]['lname'],code: code.text,email: email.text,isLogged: false,lastTime: '0h 0min',companyEmail: companyEmail,)),
             );
           }
           else{

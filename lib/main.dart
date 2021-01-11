@@ -77,6 +77,7 @@ class _LoadingState extends State<Loading> {
           id: users[0]['id'],
           name: users[0]['name'],
           code: companies[0]['code'],
+          companyEmail: companies[0]['email'],
           email: users[0]['email'],
           isLogged: users[0]['logged'],
           lastTime: users[0]['lastTime'],

@@ -15,8 +15,9 @@ class AdminDashboard extends StatefulWidget {
   final String fname;
   final String lname;
   final String code;
+  final String email;
 
-  const AdminDashboard({Key key, this.fname, this.code, this.lname}) : super(key: key);
+  const AdminDashboard({Key key, this.fname, this.code, this.lname, this.email}) : super(key: key);
 
   @override
   _AdminDashboardState createState() => _AdminDashboardState();
@@ -103,7 +104,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
           IconButton(icon: Icon(Icons.settings), onPressed: (){
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (context) => SettingsScreen(code: widget.code,)),
+              CupertinoPageRoute(builder: (context) => SettingsScreen(code: widget.code,email: widget.email,)),
             );
           })
         ],
