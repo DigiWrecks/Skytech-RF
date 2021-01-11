@@ -5,6 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skytech/screens/admin/admin-dashboard.dart';
 import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/screens/select-user.dart';
 
@@ -65,6 +67,10 @@ class _LoadingState extends State<Loading> {
     await Firebase.initializeApp();
     var sub = await FirebaseFirestore.instance.collection('user').where('deviceId', isEqualTo: deviceID).get();
     var users = sub.docs;
+    
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String adminEmail = prefs.getString('adminEmail');
+    
     if(users.isNotEmpty){
       //innawa
       var sub2 = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: users[0]['code']).get();
@@ -83,6 +89,29 @@ class _LoadingState extends State<Loading> {
           lastTime: users[0]['lastTime'],
         )),
       );
+    }
+    else if(adminEmail!=null){
+      
+      var sub = await FirebaseFirestore.instance.collection('admin').where('email', isEqualTo: adminEmail).get();
+      var admin = sub.docs;
+      if(admin.isNotEmpty){
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(builder: (context) => AdminDashboard(
+            email: adminEmail,
+            code: admin[0]['code'],
+            fname: admin[0]['fname'],
+            lname: admin[0]['lname'],
+          )),
+        );
+      }
+      else{
+        prefs.setString('adminEmail', null);
+        Navigator.pushReplacement(
+          context,
+          CupertinoPageRoute(builder: (context) => SelectUser()),
+        );
+      }
     }
     else{
       Navigator.pushReplacement(

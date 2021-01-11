@@ -27,22 +27,34 @@ class _AdminDashboardState extends State<AdminDashboard> {
   String location;
   String sorting;
   List<DropdownMenuItem<String>> workingSiteList = [];
+  int totalMins = 0;
+  String totalHours = '0';
+
+  String durationToString(int minutes) {
+    var d = Duration(minutes:minutes);
+    List<String> parts = d.toString().split(':');
+    return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+  }
 
   getWorkingSites() async {
     await Firebase.initializeApp();
-    var sub = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: widget.code).get();
+    var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').get();
     var workingSites = sub.docs;
     location = "All";
     workingSiteList.add(
         DropdownMenuItem(child: CustomText(text:"All",color: Colors.black,),value: "All",)
     );
-    for(int i=0;i<workingSites[0]['sites'].length;i++){
+    for(int i=0;i<workingSites.length;i++){
+      totalMins += workingSites[i]['total'];
       setState(() {
         workingSiteList.add(
-          DropdownMenuItem(child: CustomText(text:workingSites[0]['sites'][i],color: Colors.black,),value: workingSites[0]['sites'][i],),
+          DropdownMenuItem(child: CustomText(text:workingSites[i]['site'],color: Colors.black,),value: workingSites[i]['site'],),
         );
       });
     }
+    setState(() {
+      totalHours = durationToString(totalMins);
+    });
   }
 
 
@@ -81,7 +93,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     getWorkingSites();
     sorting = "name";
-    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('name',descending: true));
+    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('name',descending: true).orderBy('logged', descending: true));
 
   }
 
@@ -178,7 +190,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     padding: EdgeInsets.all(ScreenUtil().setWidth(15)),
                     child: Column(
                       children: [
-                        CustomText(text: '1000 Hours',size: ScreenUtil().setSp(35),color: Colors.black,),
+                        CustomText(text: '$totalHours H',size: ScreenUtil().setSp(35),color: Colors.black,),
                         CustomText(text: 'Total Working Time',isBold: false,size: ScreenUtil().setSp(25),color: Colors.black,),
                       ],
                     ),
@@ -245,13 +257,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             itemBuilder: (context,i){
                               String name = profiles[i]['name'];
                               String email = profiles[i]['email'];
+                              bool logged = profiles[i]['logged'];
                               return Padding(
                                 padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
                                 child: GestureDetector(
                                   onTap: (){
                                     Navigator.push(
                                       context,
-                                      CupertinoPageRoute(builder: (context) => UserAnalytics(name: name,email: email,workSite: location,)),
+                                      CupertinoPageRoute(builder: (context) => UserAnalytics(name: name,email: email,workSite: location,totalMins: totalMins,adminEmail: widget.email,)),
                                     );
                                   },
                                   child: Container(
@@ -266,14 +279,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          CircleAvatar(
+                                          logged?CircleAvatar(
                                             radius: 7,
                                             backgroundColor: Colors.white,
                                             child: CircleAvatar(
                                               radius: 5,
                                               backgroundColor: Colors.green,
                                             ),
-                                          ),
+                                          ):SizedBox.shrink(),
                                           Flexible(
                                             child: Padding(
                                               padding: EdgeInsets.all(ScreenUtil().setHeight(20)),

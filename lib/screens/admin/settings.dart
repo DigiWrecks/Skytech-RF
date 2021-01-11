@@ -126,6 +126,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  String durationToString(int minutes) {
+    var d = Duration(minutes:minutes);
+    List<String> parts = d.toString().split(':');
+    return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
+  }
+
   final CollectionReference collectionReference  = FirebaseFirestore.instance.collection("admin");
   List<DocumentSnapshot> workSitesList;
   StreamSubscription<QuerySnapshot> subscription;
@@ -214,7 +220,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 physics: BouncingScrollPhysics(),
                 itemBuilder: (context,i){
                   String location = workSitesList[i]['site'];
-                  String hours = workSitesList[i]['total'].toString();
+                  String hours = durationToString(workSitesList[i]['total']);
                   return Padding(
                     key: UniqueKey(),
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
@@ -260,7 +266,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             child: Center(
                               child: Padding(
                                 padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                                child: CustomText(text: '$hours Hours',color: Colors.black,size: ScreenUtil().setSp(30),),
+                                child: CustomText(text: '$hours H',color: Colors.black,size: ScreenUtil().setSp(30),),
                               ),
                             ),
                           ),

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skytech/screens/admin/admin-dashboard.dart';
 import 'package:skytech/screens/admin/admin-register.dart';
 import 'package:skytech/widgets/button.dart';
@@ -34,6 +35,8 @@ class _AdminLoginState extends State<AdminLogin> {
       var logged = sub.docs;
 
       if(logged.isNotEmpty){
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setString('adminEmail', logged[0]['email']);
         Navigator.pushReplacement(
           context,
           CupertinoPageRoute(builder: (context) => AdminDashboard(fname: logged[0]['fname'],lname: logged[0]['lname'], code: logged[0]['code'],email:logged[0]['email'] ,)),

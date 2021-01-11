@@ -14,8 +14,10 @@ class UserAnalytics extends StatefulWidget {
   final String name;
   final String email;
   final String workSite;
+  final int totalMins;
+  final String adminEmail;
 
-  const UserAnalytics({Key key, this.name, this.email, this.workSite}) : super(key: key);
+  const UserAnalytics({Key key, this.name, this.email, this.workSite, this.totalMins, this.adminEmail}) : super(key: key);
   @override
   _UserAnalyticsState createState() => _UserAnalyticsState();
 }
@@ -68,9 +70,13 @@ class _UserAnalyticsState extends State<UserAnalytics> {
         var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
         int mins = durInMins - durInHours*60;
         // print(durInHours.toString()+" h "+mins.toString()+" min");
+        int newTotalMins = widget.totalMins + durInMins;
 
         await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
           'logout': time,
+          'logoutLat': 0,
+          'logoutLong': 0,
+          'notes': '',
           'worked': durInHours.toString()+" h "+mins.toString()+" min"
         });
 
@@ -78,6 +84,10 @@ class _UserAnalyticsState extends State<UserAnalytics> {
           'logged': false,
           'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
         });
+
+      await FirebaseFirestore.instance.collection('admin').doc(widget.adminEmail).collection('sites').doc(widget.workSite).update({
+        'total': newTotalMins,
+      });
 
         setState(() {
           logged = false;
@@ -218,18 +228,25 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                 itemBuilder: (context,i){
                   TextEditingController loginEdit = TextEditingController();
                   TextEditingController logoutEdit = TextEditingController();
-                  TextEditingController latEdit = TextEditingController();
-                  TextEditingController longEdit = TextEditingController();
+                  TextEditingController loginLatEdit = TextEditingController();
+                  TextEditingController logoutLatEdit = TextEditingController();
+                  TextEditingController loginLongEdit = TextEditingController();
+                  TextEditingController logoutLongEdit = TextEditingController();
 
                     loginEdit.text = logs[i]['login'];
                     logoutEdit.text = logs[i]['logout'];
-                    latEdit.text = logs[i]['lat'];
-                    longEdit.text = logs[i]['long'];
+
+                    loginLatEdit.text = (double.parse(logs[i]['loginLat'])).toStringAsFixed(5);
+                    logoutLatEdit.text = (double.parse(logs[i]['logoutLat'])).toStringAsFixed(5);
+                    loginLongEdit.text = (double.parse(logs[i]['loginLong'])).toStringAsFixed(5);
+                    logoutLongEdit.text = (double.parse(logs[i]['logoutLong'])).toStringAsFixed(5);
+
 
 
                   String location = logs[i]['location'];
                   String worked = logs[i]['worked'];
                   String date = logs[i]['date'];
+                  String note = logs[i]['notes'];
 
                   return Padding(
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
@@ -358,11 +375,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
-                                                        controller: latEdit,
+                                                        controller: loginLatEdit,
                                                         cursorColor: Colors.black,
                                                         style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                         decoration: InputDecoration(
-                                                          hintText: '6.11111',
+                                                          hintText: 'n/a',
                                                           enabledBorder:InputBorder.none,
                                                           focusedBorder: InputBorder.none,
                                                         ),
@@ -381,11 +398,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
-                                                        controller: longEdit,
+                                                        controller: loginLongEdit,
                                                         cursorColor: Colors.black,
                                                         style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                         decoration: InputDecoration(
-                                                          hintText: '6.11111',
+                                                          hintText: 'n/a',
                                                           enabledBorder:InputBorder.none,
                                                           focusedBorder: InputBorder.none,
                                                         ),
@@ -420,11 +437,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
-                                                        controller: latEdit,
+                                                        controller: logoutLatEdit,
                                                         cursorColor: Colors.black,
                                                         style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                         decoration: InputDecoration(
-                                                          hintText: '6.11111',
+                                                          hintText: 'n/a',
                                                           enabledBorder:InputBorder.none,
                                                           focusedBorder: InputBorder.none,
                                                         ),
@@ -443,11 +460,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
-                                                        controller: longEdit,
+                                                        controller: logoutLongEdit,
                                                         cursorColor: Colors.black,
                                                         style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
                                                         decoration: InputDecoration(
-                                                          hintText: '6.11111',
+                                                          hintText: 'n/a',
                                                           enabledBorder:InputBorder.none,
                                                           focusedBorder: InputBorder.none,
                                                         ),
@@ -501,7 +518,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                               ),
                               child: Padding(
                                 padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
-                                child: CustomText(text: 'The note that typed by the worker and use newmetro enfield to disclouser this matter',color: Colors.black,size: ScreenUtil().setSp(35),),
+                                child: CustomText(text: note,color: Colors.black,size: ScreenUtil().setSp(35),),
                               ),
                             )
                           ],
