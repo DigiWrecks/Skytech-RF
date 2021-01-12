@@ -163,21 +163,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
     final CollectionReference collectionReference  = FirebaseFirestore.instance.collection("user");
     setState(() {
           if(location=="All"&&sorting=="name"){
-                getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('fname',descending: true));
+                getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('logged', descending: true).orderBy('fname'));
           }
           else if(location=="All"&&sorting=="date"){
-            getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('timestamp',descending: true));
+            getData(collectionReference.where('code',isEqualTo: widget.code).orderBy('logged', descending: true).orderBy('timestamp',descending: true));
           }
           else if(location!="All"&&sorting=="name"){
-            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('fname',descending: true));
+            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('logged', descending: true).orderBy('fname'));
           }
           else if(location!="All"&&sorting=="date"){
-            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('timestamp',descending: true));
+            getData(collectionReference.where('code',isEqualTo: widget.code).where('locations',arrayContains: location).orderBy('logged', descending: true).orderBy('timestamp',descending: true));
           }
     });
   }
 
   getData(var q) async{
+    if(subscription!=null){
+      subscription.cancel();
+    }
     subscription = q.snapshots().listen((datasnapshot){
       setState(() {
         profiles = datasnapshot.docs;
@@ -191,7 +194,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     super.initState();
     getWorkingSites();
     sorting = "name";
-    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('fname',descending: true));
+    getData(FirebaseFirestore.instance.collection("user").where('code',isEqualTo: widget.code).orderBy('logged', descending: true).orderBy('fname'));
 
   }
 
