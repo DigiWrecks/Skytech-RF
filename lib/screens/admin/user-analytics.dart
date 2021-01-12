@@ -394,7 +394,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                         ),
                                                         onSubmitted: (x) async {
                                                           await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'login': x,
+                                                            'loginLat': x,
                                                           });
                                                         },
                                                       ),
@@ -417,7 +417,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                         ),
                                                         onSubmitted: (x) async {
                                                           await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'login': x,
+                                                            'loginLong': x,
                                                           });
                                                         },
                                                       ),
@@ -456,7 +456,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                         ),
                                                         onSubmitted: (x) async {
                                                           await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'login': x,
+                                                            'logoutLat': x,
                                                           });
                                                         },
                                                       ),
@@ -479,7 +479,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                         ),
                                                         onSubmitted: (x) async {
                                                           await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'login': x,
+                                                            'logoutLong': x,
                                                           });
                                                         },
                                                       ),

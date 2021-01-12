@@ -1,13 +1,20 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csv/csv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:intl/intl.dart';
+import 'package:ntp/ntp.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:skytech/screens/admin/settings.dart';
 import 'package:skytech/screens/admin/user-analytics.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/toast.dart';
 
 class AdminDashboard extends StatefulWidget {
 
@@ -56,6 +63,99 @@ class _AdminDashboardState extends State<AdminDashboard> {
     });
   }
 
+  exportCsv() async {
+
+    ///initializing progress dialog
+    ProgressDialog pr = ProgressDialog(context);
+    pr = ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+    pr.style(
+        message: 'Please wait...',
+        borderRadius: 10.0,
+        backgroundColor: Colors.white,
+        progressWidget: Center(child: CircularProgressIndicator()),
+        elevation: 10.0,
+        insetAnimCurve: Curves.easeInOut,
+        messageTextStyle: TextStyle(
+            color: Colors.black, fontSize: ScreenUtil().setSp(35), fontWeight: FontWeight.bold)
+    );
+
+    ///showLoadingDialog
+    //pr.show();
+
+    ///getting Dates
+    DateTime time = await NTP.now();
+    DateTime now = time.toUtc().subtract(Duration(hours: 7));
+    var start = DateFormat('MM/dd/yyyy').format(now.subtract(Duration(days: now.weekday -1)));
+    var end = DateFormat('MM/dd/yyyy').format(now.add(Duration(days: DateTime.daysPerWeek - now.weekday)));
+    print("Start "+start.toString());
+    print("End "+end.toString());
+
+    try{
+      ///get local storage path
+      Directory directory = Platform.isAndroid
+          ? await getExternalStorageDirectory()
+          : await getApplicationSupportDirectory();
+      String path = directory.absolute.path;
+      String reportName = 'report_' + DateFormat('yyyy_MM_dd').format(now.subtract(Duration(days: now.weekday -1)));
+      String finalPath = "$path/$reportName.csv";
+      print(finalPath);
+      File csvFile = await File(finalPath).create();
+
+      List<List<dynamic>> rows = List<List<dynamic>>();
+
+      ///add Headers to the csv
+      rows.add(['ID','Last Name','First Name','Date','In','Out','Lat','Long','Location','Notes']);
+
+      ///get All users
+      var namesSub = await FirebaseFirestore.instance.collection('user').where('code', isEqualTo: widget.code).get();
+      var names = namesSub.docs;
+
+      if(names.isNotEmpty){
+        ///looping each users for name and ids
+        for(int i=0;i<names.length;i++) {
+          ///get firstName and lastName
+          String fname = names[i]['fname'];
+          String lname = names[i]['lname'];
+          String id = names[i] ['id'];
+
+          ///get each log of a single user
+          var singleLogSub = await FirebaseFirestore.instance.collection('logs').doc(names[i].id).collection('logs').where('date', isGreaterThanOrEqualTo: start).where('date', isLessThanOrEqualTo: end).get();
+          var singleSub = singleLogSub.docs;
+
+          if(singleSub.isNotEmpty){
+            ///loop each log
+            singleSub.forEach((log) {
+              List<dynamic> row = List<dynamic>();
+              row.add(id);
+              row.add(lname);
+              row.add(fname);
+              row.add(log['date']);
+              row.add(log['login']);
+              row.add(log['logout']);
+              row.add(log['loginLat']);
+              row.add(log['loginLong']);
+              row.add(log['location']);
+              row.add(log['notes']);
+              rows.add(row);
+            });
+
+          }
+
+        }
+        print(rows);
+        String csv = ListToCsvConverter().convert(rows);
+        csvFile.writeAsString(csv);
+        //pr.hide();
+        ToastBar(text: 'Report Generated Successfully at $finalPath',color: Colors.green).show();
+      }
+    }
+    catch(e){
+      //pr.hide();
+      print("error "+e.toString());
+    }
+
+
+  }
 
   List<DocumentSnapshot> profiles;
   StreamSubscription<QuerySnapshot> subscription;
@@ -142,7 +242,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-                  child: Button(color: Colors.white,text: 'Export CSV',onclick: (){},textColor: Colors.green,),
+                  child: Button(color: Colors.white,text: 'Export CSV',onclick: ()=>exportCsv(),textColor: Colors.green,),
                 ),
               )
             ],
