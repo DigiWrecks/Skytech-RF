@@ -33,7 +33,6 @@ class _AdminRegisterState extends State<AdminRegister> {
   }
 
   signUp() async {
-    await Firebase.initializeApp();
     if(email.text!='' && password.text!='' && fname.text!=''&& lname.text!=''&& code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
 

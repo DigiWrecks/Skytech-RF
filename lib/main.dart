@@ -5,10 +5,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skytech/screens/admin/admin-dashboard.dart';
 import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/screens/select-user.dart';
+import 'package:skytech/screens/update.dart';
 
 void main() {
   runApp(MyApp());
@@ -75,58 +77,80 @@ class _LoadingState extends State<Loading> {
       //innawa
       var sub2 = await FirebaseFirestore.instance.collection('admin').where('code',isEqualTo: users[0]['code']).get();
       var companies = sub2.docs;
-      Navigator.pushReplacement(
-        context,
-        CupertinoPageRoute(builder: (context) => DashBoard(
-          deviceID: deviceID,
-          companyName: companies[0]['fname']+' '+companies[0]['lname'],
-          id: users[0]['id'],
-          name: users[0]['fname']+' '+users[0]['lname'],
-          code: companies[0]['code'],
-          companyEmail: companies[0]['email'],
-          email: users[0]['email'],
-          isLogged: users[0]['logged'],
-          lastTime: users[0]['lastTime'],
-        )),
-      );
+      Navigator.of(context).pushAndRemoveUntil(
+          CupertinoPageRoute(builder: (context) => DashBoard(
+            deviceID: deviceID,
+            companyName: companies[0]['fname']+' '+companies[0]['lname'],
+            id: users[0]['id'],
+            name: users[0]['fname']+' '+users[0]['lname'],
+            code: companies[0]['code'],
+            companyEmail: companies[0]['email'],
+            email: users[0]['email'],
+            isLogged: users[0]['logged'],
+            lastTime: users[0]['lastTime'],
+          )), (Route<dynamic> route) => false);
     }
     else if(adminEmail!=null){
       
       var sub = await FirebaseFirestore.instance.collection('admin').where('email', isEqualTo: adminEmail).get();
       var admin = sub.docs;
       if(admin.isNotEmpty){
-        Navigator.pushReplacement(
-          context,
-          CupertinoPageRoute(builder: (context) => AdminDashboard(
-            email: adminEmail,
-            code: admin[0]['code'],
-            fname: admin[0]['fname'],
-            lname: admin[0]['lname'],
-          )),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+            CupertinoPageRoute(builder: (context) => AdminDashboard(
+              email: adminEmail,
+              code: admin[0]['code'],
+              fname: admin[0]['fname'],
+              lname: admin[0]['lname'],
+            )), (Route<dynamic> route) => false);
       }
       else{
         prefs.setString('adminEmail', null);
-        Navigator.pushReplacement(
-          context,
-          CupertinoPageRoute(builder: (context) => SelectUser()),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+            CupertinoPageRoute(builder: (context) => SelectUser()), (Route<dynamic> route) => false);
       }
     }
     else{
-      Navigator.pushReplacement(
-        context,
-        CupertinoPageRoute(builder: (context) => SelectUser()),
-      );
+      Navigator.of(context).pushAndRemoveUntil(
+          CupertinoPageRoute(builder: (context) => SelectUser()), (Route<dynamic> route) => false);
     }
   }
+
+  getPackageInfo() async {
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    String buildNumber = packageInfo.buildNumber;
+    String version = packageInfo.version;
+    await Firebase.initializeApp();
+    var sub = await FirebaseFirestore.instance.collection('info').where('key', isEqualTo: 'buildNumber').get();
+    var info = sub.docs;
+    print("Version is:" + version);
+    if (info.isNotEmpty) {
+      if (Platform.isAndroid) {
+        if (int.parse(buildNumber) < info[0]['androidBuildNumber']) {
+          Navigator.of(context).pushAndRemoveUntil(
+              CupertinoPageRoute(builder: (context) => UpdateScreen()), (Route<dynamic> route) => false);
+        }
+        else{
+          checkAvailiability(context);
+        }
+      } else {
+        if (int.parse(version) < info[0]['iosBuildNumber']) {
+          Navigator.of(context).pushAndRemoveUntil(
+              CupertinoPageRoute(builder: (context) => UpdateScreen()), (Route<dynamic> route) => false);
+        }
+        else{
+          checkAvailiability(context);
+        }
+      }
+    }
+  }
+
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     getDeviceID();
-    checkAvailiability(context);
+    getPackageInfo();
   }
 
   @override

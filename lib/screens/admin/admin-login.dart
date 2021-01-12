@@ -23,7 +23,6 @@ class _AdminLoginState extends State<AdminLogin> {
   TextEditingController password = TextEditingController();
 
   logIn() async {
-    await Firebase.initializeApp();
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try {
       await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -37,10 +36,8 @@ class _AdminLoginState extends State<AdminLogin> {
       if(logged.isNotEmpty){
         SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('adminEmail', logged[0]['email']);
-        Navigator.pushReplacement(
-          context,
-          CupertinoPageRoute(builder: (context) => AdminDashboard(fname: logged[0]['fname'],lname: logged[0]['lname'], code: logged[0]['code'],email:logged[0]['email'] ,)),
-        );
+        Navigator.of(context).pushAndRemoveUntil(
+            CupertinoPageRoute(builder: (context) => AdminDashboard(fname: logged[0]['fname'],lname: logged[0]['lname'], code: logged[0]['code'],email:logged[0]['email'] ,)), (Route<dynamic> route) => false);
       }
 
     } on FirebaseAuthException catch (e) {

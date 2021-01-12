@@ -48,7 +48,6 @@ class _RegisterDeviceState extends State<RegisterDevice> {
   String companyEmail;
 
   registerDevice() async {
-    await Firebase.initializeApp();
     if(email.text!='' && id.text!='' && fname.text!=''&& lname.text!=''&&code.text!=''){
       ToastBar(color: Colors.orange,text: 'Please wait...').show();
 
@@ -89,19 +88,17 @@ class _RegisterDeviceState extends State<RegisterDevice> {
             });
 
             ToastBar(color: Colors.green,text: 'Device Registered!').show();
-            Navigator.pushReplacement(
-              context,
-              CupertinoPageRoute(builder: (context) => DashBoard(
-                name: fname.text+' '+lname.text,
-                deviceID: deviceID,
-                id: id.text,
-                companyName: companies[0]['fname']+' '+companies[0]['lname'],
-                code: code.text,
-                email: email.text,
-                isLogged: false,
-                lastTime: '0h 0min',
-                companyEmail: companyEmail,)),
-            );
+              Navigator.of(context).pushAndRemoveUntil(
+                  CupertinoPageRoute(builder: (context) => DashBoard(
+                    name: fname.text+' '+lname.text,
+                    deviceID: deviceID,
+                    id: id.text,
+                    companyName: companies[0]['fname']+' '+companies[0]['lname'],
+                    code: code.text,
+                    email: email.text,
+                    isLogged: false,
+                    lastTime: '0h 0min',
+                    companyEmail: companyEmail,)), (Route<dynamic> route) => false);
           }
           else{
             ToastBar(color: Colors.red,text: 'Company Doesn\'t Exists!').show();
@@ -113,20 +110,18 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               'deviceId': deviceID
             });
             ToastBar(color: Colors.green,text: 'Device Updated!').show();
-            Navigator.pushReplacement(
-              context,
-              CupertinoPageRoute(builder: (context) => DashBoard(
-                deviceID: deviceID,
-                companyName: companies[0]['fname']+' '+companies[0]['lname'],
-                id: users[0]['id'],
-                name: users[0]['fname']+' '+users[0]['lname'],
-                code: companies[0]['code'],
-                email: users[0]['email'],
-                isLogged: users[0]['logged'],
-                lastTime: users[0]['lastTime'],
-                companyEmail: companies[0]['email'],
-              )),
-            );
+            Navigator.of(context).pushAndRemoveUntil(
+                CupertinoPageRoute(builder: (context) => DashBoard(
+                  deviceID: deviceID,
+                  companyName: companies[0]['fname']+' '+companies[0]['lname'],
+                  id: users[0]['id'],
+                  name: users[0]['fname']+' '+users[0]['lname'],
+                  code: companies[0]['code'],
+                  email: users[0]['email'],
+                  isLogged: users[0]['logged'],
+                  lastTime: users[0]['lastTime'],
+                  companyEmail: companies[0]['email'],
+                )), (Route<dynamic> route) => false);
           }
           else{
             ToastBar(color: Colors.red,text: 'Your account is already registered on another device!').show();

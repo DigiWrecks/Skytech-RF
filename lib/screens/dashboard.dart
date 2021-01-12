@@ -59,7 +59,6 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   getWorkingSites() async {
-    await Firebase.initializeApp();
     getLocation();
     var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').get();
     var workingSites = sub.docs;

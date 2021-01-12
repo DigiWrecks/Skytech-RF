@@ -43,7 +43,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   }
 
   getWorkingSites() async {
-    await Firebase.initializeApp();
     var sub = await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').get();
     var workingSites = sub.docs;
     location = "All";
@@ -80,7 +79,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
 
     ///showLoadingDialog
-    //pr.show();
+    pr.show();
 
     ///getting Dates
     DateTime time = await NTP.now();
@@ -145,12 +144,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
         print(rows);
         String csv = ListToCsvConverter().convert(rows);
         csvFile.writeAsString(csv);
-        //pr.hide();
+        pr.hide();
         ToastBar(text: 'Report Generated Successfully at $finalPath',color: Colors.green).show();
       }
     }
     catch(e){
-      //pr.hide();
+      pr.hide();
       print("error "+e.toString());
     }
 
