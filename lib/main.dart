@@ -4,7 +4,9 @@ import 'package:device_info/device_info.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:skytech/screens/admin/admin-dashboard.dart';
@@ -63,6 +65,20 @@ class _LoadingState extends State<Loading> {
         deviceID = iosInfo.identifierForVendor;
       });
     }
+  }
+
+  initOneSignal() async {
+
+    await DotEnv().load('.env');
+
+    OneSignal.shared.init(
+        DotEnv().env['ONESIGNAL_APP_ID'],
+        iOSSettings: {
+          OSiOSSettings.autoPrompt: true,
+          OSiOSSettings.inAppLaunchUrl: false
+        }
+    );
+    OneSignal.shared.setInFocusDisplayType(OSNotificationDisplayType.notification);
   }
 
   checkAvailiability(BuildContext context) async {
@@ -150,6 +166,7 @@ class _LoadingState extends State<Loading> {
     // TODO: implement initState
     super.initState();
     getDeviceID();
+    initOneSignal();
     getPackageInfo();
   }
 

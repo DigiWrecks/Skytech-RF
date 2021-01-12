@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,6 +8,7 @@ import 'package:flutter_screenutil/screenutil.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
@@ -96,6 +99,12 @@ class _DashBoardState extends State<DashBoard> {
       String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
       String timestamp = now.toUtc().subtract(Duration(hours: 7)).toString();
 
+      String playerID;
+      OneSignal.shared.getPermissionSubscriptionState().then((result) {
+        playerID = result.subscriptionStatus.userId;
+      });
+
+
       var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
       var details = sub.docs;
 
@@ -115,7 +124,8 @@ class _DashBoardState extends State<DashBoard> {
             'login': time,
             'logout': 'n/a',
             'worked': 'n/a',
-            'notes': ''
+            'notes': '',
+            'playerId': playerID
 
       });
 
@@ -239,6 +249,8 @@ class _DashBoardState extends State<DashBoard> {
     );
   }
 
+
+  StreamSubscription<QuerySnapshot> subscription;
   @override
   void initState() {
     // TODO: implement initState
@@ -248,9 +260,22 @@ class _DashBoardState extends State<DashBoard> {
     getWorkingSites();
     logged = widget.isLogged;
     lastTime = widget.lastTime;
-
+    subscription = FirebaseFirestore.instance.collection('user').where('email', isEqualTo: widget.email).snapshots().listen((datasnapshot){
+      setState(() {
+        var logs = datasnapshot.docs;
+        logged = logs[0]['logged'];
+        lastTime = logs[0]['lastTime'];
+      });
+    });
     print(widget.name+widget.id+widget.code+widget.email+widget.companyName+widget.deviceID+widget.lastTime+widget.isLogged.toString());
 
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    subscription?.cancel();
   }
 
 
