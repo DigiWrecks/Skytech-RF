@@ -54,7 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     cursorColor: Colors.black,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      hintText: 'Latitude',
+                      hintText: 'Lat',
                       enabledBorder:UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black, width: 2),
                       ),
@@ -69,7 +69,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     cursorColor: Colors.black,
                     keyboardType: TextInputType.number,
                     decoration: InputDecoration(
-                      hintText: 'Longitude',
+                      hintText: 'Long',
                       enabledBorder:UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black, width: 2),
                       ),

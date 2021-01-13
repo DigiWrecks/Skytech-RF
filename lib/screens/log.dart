@@ -151,11 +151,11 @@ class _LogState extends State<Log> {
                                       children: [
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Latitude : ${(double.parse(logInlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Lat : ${(double.parse(logInlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Longitude : ${(double.parse(logInlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Long : ${(double.parse(logInlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                       ],
                                     ),
@@ -171,11 +171,11 @@ class _LogState extends State<Log> {
                                       children: [
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Latitude : ${(double.parse(logOutlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Lat : ${(double.parse(logOutlat)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                         Padding(
                                           padding:  EdgeInsets.all(ScreenUtil().setWidth(10)),
-                                          child: CustomText(text: 'Longitude : ${(double.parse(logOutlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                          child: CustomText(text: 'Long : ${(double.parse(logOutlong)).toStringAsFixed(5)}',size: ScreenUtil().setSp(30),color: Colors.black,),
                                         ),
                                       ],
                                     ),

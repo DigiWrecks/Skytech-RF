@@ -26,6 +26,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
   TextEditingController email = TextEditingController();
   TextEditingController id = TextEditingController();
   String deviceID = 'N/A';
+  bool isForeman = false;
 
   getDeviceID() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -79,7 +80,8 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               'logged': false,
               'timestamp': time.toUtc().subtract(Duration(hours: 7)).toString(),
               'lastTime': '0h 0min',
-              'locations': []
+              'locations': [],
+              'isForeman': isForeman
             });
 
             await FirebaseFirestore.instance.collection('admin').doc(companies[0].id).update({
@@ -169,6 +171,22 @@ class _RegisterDeviceState extends State<RegisterDevice> {
                 InputField(hint: 'Email',type: TextInputType.emailAddress,controller: email,),
                 InputField(hint: 'ID Number',controller: id,),
                 InputField(hint: 'Company Code',controller: code,),
+
+                Padding(
+                  padding: EdgeInsets.all(ScreenUtil().setHeight(40)),
+                  child: CheckboxListTile(
+                    value: isForeman,
+                    onChanged: (x){
+                      setState(() {
+                        isForeman = x;
+                      });
+                    },
+                    checkColor: Colors.black,
+                    activeColor: Colors.white,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    title: CustomText(text: 'Are you a Foreman?',),
+                  ),
+                ),
               
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),

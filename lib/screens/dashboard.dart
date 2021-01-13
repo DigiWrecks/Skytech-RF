@@ -40,6 +40,7 @@ class _DashBoardState extends State<DashBoard> {
   String date = "N/A";
   String location = "Fetching";
   bool logged;
+  bool isForeman;
   String lastTime;
   double distance;
 
@@ -192,7 +193,10 @@ class _DashBoardState extends State<DashBoard> {
          lastTime = durInHours.toString()+" h "+mins.toString()+" min";
        });
        ToastBar(color: Colors.green,text: 'Logged out!').show();
-       Navigator.pop(context);
+       if(isForeman){
+         Navigator.pop(context);
+       }
+
      }
      else{
        ToastBar(color: Colors.red,text: 'You must within the range of 250ft from your logged in location!').show();
@@ -265,6 +269,7 @@ class _DashBoardState extends State<DashBoard> {
         var logs = datasnapshot.docs;
         logged = logs[0]['logged'];
         lastTime = logs[0]['lastTime'];
+        isForeman = logs[0]['isForeman'];
       });
     });
     print(widget.name+widget.id+widget.code+widget.email+widget.companyName+widget.deviceID+widget.lastTime+widget.isLogged.toString());
@@ -490,13 +495,13 @@ class _DashBoardState extends State<DashBoard> {
                               }
                               else{
                                 await getWorkingSites();
-                                if(location!=null){
+                                if(location!=null||location!='Fetching'){
                                   if(!logged){
                                     onLoginPressed();
                                     Navigator.pop(context);
                                   }else{
                                     Navigator.pop(context);
-                                    notePopUp(context);
+                                    isForeman?notePopUp(context):onLogoutPressed('n/a');
                                   }
                                 }
                                 else{

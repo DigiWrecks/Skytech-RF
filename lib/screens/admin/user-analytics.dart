@@ -380,7 +380,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                               children: [
                                                 Row(
                                                   children: [
-                                                    CustomText(text: 'Latitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    CustomText(text: 'Lat:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
@@ -403,7 +403,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                 ),
                                                 Row(
                                                   children: [
-                                                    CustomText(text: 'Longitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    CustomText(text: 'Long:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
@@ -442,7 +442,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                               children: [
                                                 Row(
                                                   children: [
-                                                    CustomText(text: 'Latitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    CustomText(text: 'Lat:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
@@ -465,7 +465,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                                 ),
                                                 Row(
                                                   children: [
-                                                    CustomText(text: 'Longitude:-',size: ScreenUtil().setSp(30),color: Colors.black,),
+                                                    CustomText(text: 'Long:-',size: ScreenUtil().setSp(30),color: Colors.black,),
                                                     SizedBox(width: ScreenUtil().setWidth(10),),
                                                     Expanded(
                                                       child: TextField(
