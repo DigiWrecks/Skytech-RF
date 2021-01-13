@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
+import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 
 class Log extends StatefulWidget {
@@ -75,6 +76,7 @@ class _LogState extends State<Log> {
             String login = logs[i]['login'];
             String logout = logs[i]['logout'];
             String location = logs[i]['location'];
+            bool overtime = logs[i]['overtime'];
 
             return Padding(
               padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
@@ -92,6 +94,21 @@ class _LogState extends State<Log> {
                           Icon(Icons.calendar_today,size: 25,),
                           SizedBox(width: ScreenUtil().setWidth(20),),
                           CustomText(text: date,size: ScreenUtil().setSp(35),color: Colors.black,),
+                          Expanded(child: Container()),
+                          overtime?Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40),
+                                color: Colors.red
+                              ),
+                              child: Padding(
+                                padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
+                                child: CustomText(text: 'Overtime',color: Colors.white,),
+                              ),
+                            ),
+                          ):Container()
+
                         ],
                       ),
                       SizedBox(height: ScreenUtil().setHeight(20),),

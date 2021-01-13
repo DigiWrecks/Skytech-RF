@@ -9,6 +9,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
@@ -47,13 +48,13 @@ class _DashBoardState extends State<DashBoard> {
   int totalMins;
 
   getLocation() async {
+    getDate();
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     setState(() {
       lat = position.latitude.toString();
       long = position.longitude.toString();
     });
   }
-
 
   getDate() async {
     DateTime now = await NTP.now();
@@ -92,7 +93,7 @@ class _DashBoardState extends State<DashBoard> {
     distance = Geolocator.distanceBetween(sLat, sLong, double.parse(lat), double.parse(long));
   }
 
-  onLoginPressed() async {
+  onLoginPressed({bool overtime=false}) async {
     print('entering login');
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
@@ -113,7 +114,7 @@ class _DashBoardState extends State<DashBoard> {
       if(!locationList.contains(location)){
         locationList.add(location);
       }
-
+      print("times "+timestamp.toString());
       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).set({
             'timestamp': timestamp,
             'loginLat': lat,
@@ -122,24 +123,26 @@ class _DashBoardState extends State<DashBoard> {
             'logoutLong': '0',
             'location': location,
             'date': date,
+            'overtime': overtime,
             'login': time,
             'logout': 'n/a',
             'worked': 'n/a',
             'notes': '',
-            'playerId': playerID
+            'playerId': playerID,
+            'popUp': false
 
+      }).then((value){
+         FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+          'logged': true,
+          'timestamp': timestamp,
+          'locations': locationList
+        }).then((value){
+           setState(() {
+             logged = true;
+           });
+           ToastBar(color: Colors.green,text: 'Logged in!').show();
+         });
       });
-
-      await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
-        'logged': true,
-        'timestamp': timestamp,
-        'locations': locationList
-      });
-
-      setState(() {
-        logged = true;
-      });
-      ToastBar(color: Colors.green,text: 'Logged in!').show();
     }
     catch(e){
       ToastBar(color: Colors.red,text: 'Something went wrong!').show();
@@ -254,6 +257,123 @@ class _DashBoardState extends State<DashBoard> {
   }
 
 
+  notificationLogOut({String timestamp, String locationF}) async {
+    DateTime now = await NTP.now();
+    String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
+    var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
+    var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
+    int mins = durInMins - durInHours*60;
+    // print(durInHours.toString()+" h "+mins.toString()+" min");
+
+    var s = await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').where('site', isEqualTo: locationF).limit(1).get();
+    var locs = s.docs;
+
+    int tot = locs[0]['total'];
+    tot += durInMins;
+
+
+    await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+      'logout': time,
+      'logoutLat': lat,
+      'logoutLong': long,
+      'notes': '',
+      'worked': durInHours.toString()+" h "+mins.toString()+" min"
+    });
+
+    await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+      'logged': false,
+      'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
+    });
+
+    await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').doc(locationF).update({
+      'total': tot,
+    });
+
+    setState(() {
+      logged = false;
+      lastTime = durInHours.toString()+" h "+mins.toString()+" min";
+    });
+  }
+
+
+  notificationPopUp(String locationF) async {
+    var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
+    var details = sub.docs;
+
+    String timestamp = details[0]['timestamp'];
+    await getWorkingSites();
+    print('before if');
+    if(location!=locationF) {
+      notificationLogOut(timestamp: timestamp,locationF: locationF);
+      ToastBar(color: Colors.green,text: 'Logged out!').show();
+    }
+
+    ///showPopUp
+    else{
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Colors.white,
+            title: CustomText(text: 'Do you want to stay logged in?',align: TextAlign.center,color: Colors.black,),
+            content: Container(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+                    child: Button(text: 'Yes',color: Colors.green,onclick: () async {
+                      ProgressDialog pr = ProgressDialog(context);
+                      pr = ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+                      pr.style(
+                          message: 'Please wait...',
+                          borderRadius: 10.0,
+                          backgroundColor: Colors.white,
+                          progressWidget: Center(child: CircularProgressIndicator()),
+                          elevation: 10.0,
+                          insetAnimCurve: Curves.easeInOut,
+                          messageTextStyle: TextStyle(
+                              color: Colors.black, fontSize: ScreenUtil().setSp(35), fontWeight: FontWeight.bold)
+                      );
+                      pr.show();
+
+
+                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+                        'popUp': true
+                      });
+
+
+                      ///logOUt
+                      await notificationLogOut(locationF: locationF,timestamp: timestamp);
+                      pr.hide();
+                      pr.show();
+                      await onLoginPressed(overtime: true);
+                      pr.hide();
+                      ///login
+                      // Timer(Duration(seconds: 5),()=>onLoginPressed(overtime: true));
+
+
+                      Navigator.pop(context);
+                    }),
+                  ),
+                  Padding(
+                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+                    child: Button(text: 'No',color: Colors.red,onclick: (){
+                      Navigator.pop(context);
+                      isForeman?notePopUp(context):onLogoutPressed('n/a');
+                    }),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+
   StreamSubscription<QuerySnapshot> subscription;
   @override
   void initState() {
@@ -271,6 +391,14 @@ class _DashBoardState extends State<DashBoard> {
         lastTime = logs[0]['lastTime'];
         isForeman = logs[0]['isForeman'];
       });
+    });
+    OneSignal.shared.setNotificationOpenedHandler((OSNotificationOpenedResult result) {
+      print('getting notification');
+      Map data = result.notification.payload.additionalData;
+      print(data);
+      if(data['popUp']==true){
+        Timer(Duration(seconds: 3),()=>notificationPopUp(data['location']));
+      }
     });
     print(widget.name+widget.id+widget.code+widget.email+widget.companyName+widget.deviceID+widget.lastTime+widget.isLogged.toString());
 
