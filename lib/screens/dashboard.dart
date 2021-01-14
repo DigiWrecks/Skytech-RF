@@ -346,15 +346,14 @@ class _DashBoardState extends State<DashBoard> {
 
                       ///logOUt
                       await notificationLogOut(locationF: locationF,timestamp: timestamp);
-                      pr.hide();
-                      pr.show();
-                      await onLoginPressed(overtime: true);
-                      pr.hide();
+
+
                       ///login
+                      await onLoginPressed(overtime: true);
+                      await pr.hide();
+                      Navigator.pop(context);
                       // Timer(Duration(seconds: 5),()=>onLoginPressed(overtime: true));
 
-
-                      Navigator.pop(context);
                     }),
                   ),
                   Padding(
@@ -626,6 +625,7 @@ class _DashBoardState extends State<DashBoard> {
                                 if(location!=null||location!='Fetching'){
                                   if(!logged){
                                     onLoginPressed();
+                                    print('login button pressed entering to login');
                                     Navigator.pop(context);
                                   }else{
                                     Navigator.pop(context);
