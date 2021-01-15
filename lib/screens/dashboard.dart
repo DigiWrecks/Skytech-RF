@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -14,7 +15,7 @@ import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/toast.dart';
-
+import 'package:http/http.dart' as http;
 
 class DashBoard extends StatefulWidget {
 
@@ -93,7 +94,7 @@ class _DashBoardState extends State<DashBoard> {
     distance = Geolocator.distanceBetween(sLat, sLong, double.parse(lat), double.parse(long));
   }
 
-  onLoginPressed({bool overtime=false}) async {
+  onLoginPressed() async {
     print('entering login');
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
@@ -123,13 +124,13 @@ class _DashBoardState extends State<DashBoard> {
             'logoutLong': '0',
             'location': location,
             'date': date,
-            'overtime': overtime,
             'login': time,
             'logout': 'n/a',
             'worked': 'n/a',
             'notes': '',
             'playerId': playerID,
-            'popUp': false
+            'popUp': false,
+            'index': 1
 
       }).then((value){
          FirebaseFirestore.instance.collection('user').doc(widget.email).update({
@@ -324,6 +325,7 @@ class _DashBoardState extends State<DashBoard> {
                   Padding(
                     padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
                     child: Button(text: 'Yes',color: Colors.green,onclick: () async {
+                      ///if YES Pressed
                       ProgressDialog pr = ProgressDialog(context);
                       pr = ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
                       pr.style(
@@ -339,19 +341,38 @@ class _DashBoardState extends State<DashBoard> {
                       pr.show();
 
 
+                      ///update log to increse mutiplire and true the pop up
                       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
-                        'popUp': true
+                        'popUp': true,
+                        'index': FieldValue.increment(1)
+                      });
+
+                      ///get onesignalId
+                      String playerID;
+                      OneSignal.shared.getPermissionSubscriptionState().then((result) {
+                        playerID = result.subscriptionStatus.userId;
+                      });
+
+                      ///getCurrentTimestamp
+                      DateTime now = await NTP.now();
+                      String currentTimestamp = now.toUtc().subtract(Duration(hours: 7)).toString();
+
+
+                      ///add temp log
+                      await FirebaseFirestore.instance.collection('tempLogs').doc(widget.email).collection('logs').add({
+                        'lastLogin': currentTimestamp,
+                        'siteID': locationF,
+                        'playerId': playerID,
+                        'email': widget.email,
+                        'timestamp': timestamp
                       });
 
 
-                      ///logOUt
-                      await notificationLogOut(locationF: locationF,timestamp: timestamp);
-
-
-                      ///login
-                      await onLoginPressed(overtime: true);
                       await pr.hide();
-                      Navigator.pop(context);
+                      ToastBar(text: 'Data updated!',color: Colors.green).show();
+                        Navigator.pop(context);
+
+
                       // Timer(Duration(seconds: 5),()=>onLoginPressed(overtime: true));
 
                     }),

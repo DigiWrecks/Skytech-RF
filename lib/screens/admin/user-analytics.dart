@@ -257,7 +257,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                   String worked = logs[i]['worked'];
                   String date = logs[i]['date'];
                   String note = logs[i]['notes'];
-                  bool overtime = logs[i]['overtime'];
+                  
                   return Padding(
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
                     child: Container(
@@ -275,20 +275,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                 Icon(Icons.calendar_today,size: 25,),
                                 SizedBox(width: ScreenUtil().setWidth(20),),
                                 CustomText(text: date,size: ScreenUtil().setSp(35),color: Colors.black,),
-                                Expanded(child: Container()),
-                                overtime?Align(
-                                  alignment: Alignment.centerRight,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(40),
-                                        color: Colors.red
-                                    ),
-                                    child: Padding(
-                                      padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
-                                      child: CustomText(text: 'Overtime',color: Colors.white,),
-                                    ),
-                                  ),
-                                ):Container()
+
                               ],
                             ),
                             SizedBox(height: ScreenUtil().setHeight(20),),
