@@ -68,7 +68,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               userList.add(email.text);
               deviceList.add(deviceID);
 
-              DateTime time = await NTP.now();
+              DateTime time = DateTime.now();
 
             await FirebaseFirestore.instance.collection('user').doc(email.text).set({
               'fname': fname.text,
@@ -78,7 +78,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
               'id': id.text,
               'deviceId': deviceID,
               'logged': false,
-              'timestamp': time.toUtc().subtract(Duration(hours: 7)).toString(),
+              'timestamp': time.toString(),
               'lastTime': '0h 0min',
               'locations': [],
               'isForeman': isForeman

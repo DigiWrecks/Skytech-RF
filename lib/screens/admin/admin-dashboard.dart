@@ -82,8 +82,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
     pr.show();
 
     ///getting Dates
-    DateTime time = await NTP.now();
-    DateTime now = time.toUtc().subtract(Duration(hours: 7));
+    // DateTime time = await NTP.now();
+    // DateTime now = time.toUtc().subtract(Duration(hours: 7));
+    DateTime now = DateTime.now();
     var start = DateFormat('MM/dd/yyyy').format(now.subtract(Duration(days: now.weekday -1)));
     var end = DateFormat('MM/dd/yyyy').format(now.add(Duration(days: DateTime.daysPerWeek - now.weekday)));
     print("Start "+start.toString());

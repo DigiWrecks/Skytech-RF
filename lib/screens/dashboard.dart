@@ -58,9 +58,10 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   getDate() async {
-    DateTime now = await NTP.now();
+    // DateTime now = await NTP.now();
     setState(() {
-      date = DateFormat('MM/dd/yyyy').format(now.toUtc().subtract(Duration(hours: 7)));
+      // date = DateFormat('MM/dd/yyyy').format(now.toUtc().subtract(Duration(hours: 7)));
+      date = DateFormat('MM/dd/yyyy').format(DateTime.now());
     });
   }
 
@@ -98,9 +99,9 @@ class _DashBoardState extends State<DashBoard> {
     print('entering login');
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
-      DateTime now = await NTP.now();
-      String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
-      String timestamp = now.toUtc().subtract(Duration(hours: 7)).toString();
+      DateTime now = DateTime.now();
+      String time = DateFormat('hh:mm a').format(now);
+      String timestamp = now.toString();
 
       String playerID;
       OneSignal.shared.getPermissionSubscriptionState().then((result) {
@@ -166,10 +167,10 @@ class _DashBoardState extends State<DashBoard> {
      print('distance is'+distance.toString());
 
      if(distance<76){
-       DateTime now = await NTP.now();
-       String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
-       var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
-       var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
+       DateTime now = DateTime.now();
+       String time = DateFormat('hh:mm a').format(now);
+       var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
+       var durInHours =  now.difference(DateTime.parse(timestamp)).inHours;
        int mins = durInMins - durInHours*60;
        // print(durInHours.toString()+" h "+mins.toString()+" min");
         totalMins += durInMins;
@@ -259,10 +260,10 @@ class _DashBoardState extends State<DashBoard> {
 
 
   notificationLogOut({String timestamp, String locationF}) async {
-    DateTime now = await NTP.now();
-    String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
-    var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
-    var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
+    DateTime now = DateTime.now();
+    String time = DateFormat('hh:mm a').format(now);
+    var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
+    var durInHours =  now.difference(DateTime.parse(timestamp)).inHours;
     int mins = durInMins - durInHours*60;
     // print(durInHours.toString()+" h "+mins.toString()+" min");
 
@@ -354,8 +355,8 @@ class _DashBoardState extends State<DashBoard> {
                       });
 
                       ///getCurrentTimestamp
-                      DateTime now = await NTP.now();
-                      String currentTimestamp = now.toUtc().subtract(Duration(hours: 7)).toString();
+                      DateTime now = DateTime.now();
+                      String currentTimestamp = now.toString();
 
 
                       ///add temp log
@@ -643,7 +644,7 @@ class _DashBoardState extends State<DashBoard> {
                               }
                               else{
                                 await getWorkingSites();
-                                if(location!=null||location!='Fetching'){
+                                if(location!=null){
                                   if(!logged){
                                     onLoginPressed();
                                     print('login button pressed entering to login');

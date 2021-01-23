@@ -26,8 +26,8 @@ class _LogState extends State<Log> {
   StreamSubscription<QuerySnapshot> subscription;
 
   getNTP() async {
-    DateTime now = await NTP.now();
-    String lastDate = DateFormat('MM/dd/yyyy').format(now.toUtc().subtract(Duration(hours: 7)).subtract(Duration(days:7)));
+    DateTime now = DateTime.now();
+    String lastDate = DateFormat('MM/dd/yyyy').format(now.subtract(Duration(days:7)));
     CollectionReference collectionReference  = FirebaseFirestore.instance.collection("logs").doc(widget.email).collection('logs');
     subscription = collectionReference.where('date',isGreaterThanOrEqualTo: lastDate).orderBy('date',descending: true).snapshots().listen((datasnapshot){
       setState(() {

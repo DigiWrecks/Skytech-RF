@@ -64,10 +64,11 @@ class _UserAnalyticsState extends State<UserAnalytics> {
   logOutUser() async {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
     try{
-      DateTime now = await NTP.now();
-        String time = DateFormat('hh:mm a').format(now.toUtc().subtract(Duration(hours: 7)));
-        var durInMins =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inMinutes;
-        var durInHours =  now.toUtc().subtract(Duration(hours: 7)).difference(DateTime.parse(timestamp)).inHours;
+        //DateTime now = await NTP.now();
+        DateTime now = DateTime.now();
+        String time = DateFormat('hh:mm a').format(now);
+        var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
+        var durInHours =  now.difference(DateTime.parse(timestamp)).inHours;
         int mins = durInMins - durInHours*60;
         // print(durInHours.toString()+" h "+mins.toString()+" min");
 
