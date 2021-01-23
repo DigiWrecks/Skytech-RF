@@ -18,7 +18,6 @@ import 'package:skytech/widgets/toast.dart';
 import 'package:http/http.dart' as http;
 
 class DashBoard extends StatefulWidget {
-
   final String name;
   final String id;
   final String companyName;
@@ -305,9 +304,9 @@ class _DashBoardState extends State<DashBoard> {
     String timestamp = details[0]['timestamp'];
     await getWorkingSites();
     print('before if');
-    if(location!=locationF) {
-      notificationLogOut(timestamp: timestamp,locationF: locationF);
-      ToastBar(color: Colors.green,text: 'Logged out!').show();
+    if (location != locationF) {
+      notificationLogOut(timestamp: timestamp, locationF: locationF);
+      ToastBar(color: Colors.green, text: 'Logged out!').show();
     }
 
     ///showPopUp
