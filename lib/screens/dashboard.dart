@@ -73,7 +73,7 @@ class _DashBoardState extends State<DashBoard> {
       double longOfSite = workingSites[i]['long'];
       double distance = Geolocator.distanceBetween(latOfSite, longOfSite, double.parse(lat), double.parse(long));
       print(distance);
-      if(distance < 100){
+      if(distance < 107){
         setState(() {
           location = workingSites[i]['site'];
           totalMins = workingSites[i]['total'];
@@ -165,7 +165,7 @@ class _DashBoardState extends State<DashBoard> {
       calculateDistance(sLat: double.parse(locations[0]['loginLat']),sLong: double.parse(locations[0]['loginLong']));
      print('distance is'+distance.toString());
 
-     if(distance<76){
+     if(distance<107){
        DateTime now = DateTime.now();
        String time = DateFormat('hh:mm a').format(now);
        var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
@@ -203,7 +203,7 @@ class _DashBoardState extends State<DashBoard> {
 
      }
      else{
-       ToastBar(color: Colors.red,text: 'You must within the range of 250ft from your logged in location!').show();
+       ToastBar(color: Colors.red,text: 'You must within the range of 350ft from your logged in location!').show();
      }
 
     }
