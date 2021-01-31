@@ -175,17 +175,22 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
                 Padding(
                   padding: EdgeInsets.all(ScreenUtil().setHeight(40)),
-                  child: CheckboxListTile(
-                    value: isForeman,
-                    onChanged: (x){
-                      setState(() {
-                        isForeman = x;
-                      });
-                    },
-                    checkColor: Colors.black,
-                    activeColor: Colors.white,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    title: CustomText(text: 'Are you a Foreman?',),
+                  child: Theme(
+                    data: ThemeData(
+                      unselectedWidgetColor: Colors.white
+                    ),
+                    child: CheckboxListTile(
+                      value: isForeman,
+                      onChanged: (x){
+                        setState(() {
+                          isForeman = x;
+                        });
+                      },
+                      checkColor: Colors.black,
+                      activeColor: Colors.white,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      title: CustomText(text: 'Are you a Foreman?',),
+                    ),
                   ),
                 ),
               
@@ -207,7 +212,7 @@ class _RegisterDeviceState extends State<RegisterDevice> {
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: ScreenUtil().setWidth(60)),
-                  child: Button(text: 'Register',borderRadius: 10,color: Constants.kButtonBlue,onclick: ()=>registerDevice(),),
+                  child: Button(text: 'Go',borderRadius: 10,color: Constants.kButtonBlue,onclick: ()=>registerDevice(),),
                 )
 
               ],

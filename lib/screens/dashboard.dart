@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 
+import 'package:blinking_text/blinking_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,11 +13,16 @@ import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:skytech/constants.dart';
 import 'package:skytech/screens/log.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/image-button.dart';
 import 'package:skytech/widgets/toast.dart';
 import 'package:http/http.dart' as http;
+
+import 'admin/locations.dart';
+import 'comments.dart';
 
 class DashBoard extends StatefulWidget {
   final String name;
@@ -39,13 +46,15 @@ class _DashBoardState extends State<DashBoard> {
   String lat = "0";
   String long = "0";
   String date = "N/A";
-  String location = "Fetching";
+  String location = "";
   bool logged;
   bool isForeman;
   String lastTime;
   double distance;
 
   int totalMins;
+  int budgeted;
+  String dueDate;
 
   getLocation() async {
     getDate();
@@ -73,10 +82,12 @@ class _DashBoardState extends State<DashBoard> {
       double longOfSite = workingSites[i]['long'];
       double distance = Geolocator.distanceBetween(latOfSite, longOfSite, double.parse(lat), double.parse(long));
       print(distance);
-      if(distance < 107){
+      if(distance < 123){
         setState(() {
           location = workingSites[i]['site'];
           totalMins = workingSites[i]['total'];
+          budgeted = workingSites[i]['budgeted'];
+          dueDate = workingSites[i]['dueDate'];
         });
         break;
       }
@@ -165,7 +176,7 @@ class _DashBoardState extends State<DashBoard> {
       calculateDistance(sLat: double.parse(locations[0]['loginLat']),sLong: double.parse(locations[0]['loginLong']));
      print('distance is'+distance.toString());
 
-     if(distance<107){
+     if(distance<123){
        DateTime now = DateTime.now();
        String time = DateFormat('hh:mm a').format(now);
        var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
@@ -445,257 +456,346 @@ class _DashBoardState extends State<DashBoard> {
           IconButton(icon: Icon(Icons.assessment_sharp), onPressed: (){
             Navigator.push(
               context,
-              CupertinoPageRoute(builder: (context) => Log(email: widget.email,)),
+              CupertinoPageRoute(builder: (context) => Log(email: widget.email,name: widget.name,)),
             );
           })
         ],
       ),
 
       body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: ScreenUtil().setHeight(30),),
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                height: ScreenUtil().setHeight(80),
-                width: ScreenUtil().setWidth(260),
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.horizontal(left: Radius.circular(10))
-                ),
-                child: Center(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(Icons.calendar_today,size: 20,),
-                        SizedBox(width: ScreenUtil().setWidth(20),),
-                        CustomText(text: date,size: ScreenUtil().setSp(30),color: Colors.black,),
-                      ],
-                    )
-                ),
+        child: Padding(
+          padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ///name and refresh
+              SizedBox(height: ScreenUtil().setHeight(40),),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ///name
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ///name
+                      CustomText(text: 'Hello,',color: Color(0xffE6D5B8),size: ScreenUtil().setSp(35),),
+                      CustomText(text: widget.name,size: ScreenUtil().setSp(50),),
+                    ],
+                  ),
+
+                  ///refresh button
+                  GestureDetector(
+                    onTap: (){
+                      setState(() {
+                          location = "";
+                      });
+                      getWorkingSites();
+                      },
+                    child: Container(
+                      height: ScreenUtil().setHeight(100),
+                      width : ScreenUtil().setHeight(100),
+                      decoration: BoxDecoration(
+                        color: Constants.kButtonBlue,
+                        borderRadius: BorderRadius.circular(10)
+                      ),
+                      child: Icon(Icons.cached,color: Colors.white,size: 35,),
+                    ),
+                  )
+                ],
               ),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(10),),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: widget.name,size: ScreenUtil().setSp(50),align: TextAlign.start,),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(10),),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: CustomText(text: 'ID : ${widget.id}',size: ScreenUtil().setSp(30),),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(30),),
-            Padding(
-              padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(40)),
-              child: Container(
-                width: double.infinity,
+              SizedBox(height: ScreenUtil().setHeight(20),),
+
+              ///logged status
+              if(logged)
+              Container(
                 decoration: BoxDecoration(
-                    color: Color(0xff99A8B2),
-                    borderRadius: BorderRadius.circular(10)
+                  color: Theme.of(context).primaryColor,
+                  borderRadius: BorderRadius.circular(10),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                  padding:  EdgeInsets.all(ScreenUtil().setHeight(25)),
                   child: Column(
                     children: [
-                      CustomText(text: 'Latitude',color: Colors.black,size: ScreenUtil().setSp(30),),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      Padding(
-                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: (double.parse(lat)).toStringAsFixed(5),color: Colors.black,size: ScreenUtil().setSp(28),),
-                          ),
-                        ),
+
+                      ///you are logged in
+                      CustomText(text: 'You are logged in',color: Colors.green,size: ScreenUtil().setSp(30),),
+                      SizedBox(height: ScreenUtil().setHeight(20),),
+
+                      ///date and location
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          ///location
+                          CustomText(text: location,size: ScreenUtil().setSp(40)),
+                          ///date
+                          CustomText(text: date,size: ScreenUtil().setSp(40)),
+                        ],
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      CustomText(text: 'Longitude',color: Colors.black,size: ScreenUtil().setSp(30),),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      Padding(
-                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: (double.parse(long)).toStringAsFixed(5),color: Colors.black,size: ScreenUtil().setSp(28),),
-                          ),
-                        ),
+                      SizedBox(height: ScreenUtil().setHeight(25),),
+
+                      ///due date
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(text: 'Due Date:',size: ScreenUtil().setSp(30),),
+                          CustomText(text: dueDate??'n/a',size: ScreenUtil().setSp(30),),
+                        ],
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      CustomText(text: 'Company Name',color: Colors.black,size: ScreenUtil().setSp(30),),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      Padding(
-                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: widget.companyName,color: Colors.black,size: ScreenUtil().setSp(28),),
-                          ),
-                        ),
+                      SizedBox(height: ScreenUtil().setHeight(10),),
+
+                      ///due date
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(text: 'Projected Completion:',size: ScreenUtil().setSp(30),),
+                          CustomText(text: (totalMins/budgeted*100).toStringAsFixed(2)+"%",size: ScreenUtil().setSp(30),),
+                        ],
                       ),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      CustomText(text: 'Device ID',color: Colors.black,size: ScreenUtil().setSp(30),),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
-                      Padding(
-                        padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(30)),
-                        child: Container(
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10)
-                          ),
-                          child: Padding(
-                            padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                            child: CustomText(text: widget.deviceID,color: Colors.black,size: ScreenUtil().setSp(28),),
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: ScreenUtil().setHeight(15),),
+                      SizedBox(height: ScreenUtil().setHeight(10),),
+
                     ],
                   ),
                 ),
               ),
-            ),
+              SizedBox(height: ScreenUtil().setHeight(30),),
 
-            SizedBox(height: ScreenUtil().setHeight(30),),
+              ///login time
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Date:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: date,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
 
-            Visibility(
-              visible: !logged,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(50)),
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Color(0xff99A8B2),
-                      border: Border.all(color: Colors.white,width: 3)
+              ///organization
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Organization:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: widget.companyName,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
+
+              ///id
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'ID Number:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: widget.id,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
+
+              ///email
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Email:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: widget.email,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
+
+              ///device id
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Device ID:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: widget.deviceID,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
+
+              ///lat
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Latitude:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: lat,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(15),),
+
+              ///long
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  CustomText(text: 'Longitude:',size: ScreenUtil().setSp(30),),
+                  SizedBox(width: ScreenUtil().setWidth(10),),
+                  CustomText(text: long,size: ScreenUtil().setSp(30),),
+                ],
+              ),
+              SizedBox(height: ScreenUtil().setHeight(50),),
+
+
+              ///detected location
+              Visibility(
+                visible: !logged,
+                child: Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(50)),
+                    // child: CustomText(text: location!=null?location:'You are not within the work site!',size: ScreenUtil().setSp(35),),
+                    child: BlinkText(
+                        location!=null?'LOCATION DETECTED $location':'LOCATION NOT FOUND',
+                        style: TextStyle(fontSize: ScreenUtil().setSp(40),fontWeight: FontWeight.bold),
+                        beginColor: location!=null?Color(0xff2CE5E5):Color(0xffE56F2C),
+                        endColor: Colors.transparent,
+                        textAlign: TextAlign.center,
+                        duration: Duration(milliseconds: 800)
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(ScreenUtil().setWidth(10)),
-                      child: Row(
-                        children: [
-                          SizedBox(width: ScreenUtil().setWidth(20)),
-                          Expanded(
-                            child: SizedBox(
-                                child: CustomText(text: location!=null?location:'You are not within the work site!',size: ScreenUtil().setSp(35),)),
-                          ),
-                          IconButton(
-                            onPressed: (){
-                              setState(() {
-                                location = "Fetching";
-                              });
-                              getWorkingSites();
-                            },
-                            icon: Icon(Icons.refresh),
-                          )
-                        ],
+                  ),
+                ),
+              ),
+              SizedBox(height: ScreenUtil().setHeight(40),),
+
+
+              ///add or edit comment
+              Visibility(
+                visible: logged,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: (){
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (context) => Comments(name: widget.name,date: date,location: location,email: widget.email)),
+                      );
+                    },
+                    child: Container(
+                      width: ScreenUtil().setWidth(500),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Constants.kButtonBlue
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.all(ScreenUtil().setSp(20)),
+                        child: CustomText(text: 'Add/Edit Comment',size: ScreenUtil().setSp(40),),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(height: ScreenUtil().setHeight(40),),
-            Center(
-              child: GestureDetector(
-                onTap: (){
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context){
-                      return AlertDialog(
-                        content: CustomText(text: 'Are you sure you want to ${!logged?'log in':'log out'}?',color: Colors.black,),
-                        actions: [
-                          FlatButton(onPressed: () async {
-                            ToastBar(text: 'Please wait...', color: Colors.orange).show();
-                            bool isLocationServiceEnabled  = await Geolocator.isLocationServiceEnabled();
-                            if(isLocationServiceEnabled){
-                              LocationPermission permission = await Geolocator.checkPermission();
-                             // print(permission);
-                              if(permission==LocationPermission.deniedForever){
-                                ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
-                                await Geolocator.openAppSettings();
-                              }
-                              else if(permission == LocationPermission.denied){
-                                ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
-                                LocationPermission perm = await Geolocator.requestPermission();
-                                if(perm==LocationPermission.deniedForever){
+              if(logged)
+              SizedBox(height: ScreenUtil().setHeight(40),),
+
+
+              ///log button
+              Center(
+                child: GestureDetector(
+                  onTap: (){
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context){
+                        return AlertDialog(
+                          content: CustomText(text: 'Are you sure you want to ${!logged?'log in':'log out'}?',color: Colors.black,),
+                          actions: [
+                            FlatButton(onPressed: () async {
+                              ToastBar(text: 'Please wait...', color: Colors.orange).show();
+                              bool isLocationServiceEnabled  = await Geolocator.isLocationServiceEnabled();
+                              if(isLocationServiceEnabled){
+                                LocationPermission permission = await Geolocator.checkPermission();
+                               // print(permission);
+                                if(permission==LocationPermission.deniedForever){
                                   ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
                                   await Geolocator.openAppSettings();
                                 }
-                              }
-                              else{
-                                await getWorkingSites();
-                                if(location!=null){
-                                  if(!logged){
-                                    onLoginPressed();
-                                    print('login button pressed entering to login');
-                                    Navigator.pop(context);
-                                  }else{
-                                    Navigator.pop(context);
-                                    isForeman?notePopUp(context):onLogoutPressed('n/a');
+                                else if(permission == LocationPermission.denied){
+                                  ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
+                                  LocationPermission perm = await Geolocator.requestPermission();
+                                  if(perm==LocationPermission.deniedForever){
+                                    ToastBar(text: 'Please accept location permissions for continue', color: Colors.red).show();
+                                    await Geolocator.openAppSettings();
                                   }
                                 }
                                 else{
-                                  ToastBar(text: 'You are not within the work site!', color: Colors.red).show();
+                                  await getWorkingSites();
+                                  if(location!=null){
+                                    if(!logged){
+                                      onLoginPressed();
+                                      print('login button pressed entering to login');
+                                      Navigator.pop(context);
+                                    }else{
+                                      Navigator.pop(context);
+                                      isForeman?notePopUp(context):onLogoutPressed('n/a');
+                                    }
+                                  }
+                                  else{
+                                    ToastBar(text: 'You are not within the work site!', color: Colors.red).show();
+                                  }
                                 }
+                              }else{
+                                ToastBar(text: 'Please enable location service for continue', color: Colors.red).show();
+                                await Geolocator.openLocationSettings();
                               }
-                            }else{
-                              ToastBar(text: 'Please enable location service for continue', color: Colors.red).show();
-                              await Geolocator.openLocationSettings();
-                            }
 
 
-                          }, child: CustomText(text: 'Yes',color: Colors.black,)),
-                          FlatButton(onPressed: () async {
-                            Navigator.pop(context);
-                          }, child: CustomText(text: 'No',color: Colors.black,)),
-                        ],
-                      );
-                    }
-                  );
-                },
-                child: Container(
-                  width: ScreenUtil().setWidth(400),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: !logged?Colors.green:Colors.red
+                            }, child: CustomText(text: 'Yes',color: Colors.black,)),
+                            FlatButton(onPressed: () async {
+                              Navigator.pop(context);
+                            }, child: CustomText(text: 'No',color: Colors.black,)),
+                          ],
+                        );
+                      }
+                    );
+                  },
+                  child: Container(
+                    width: ScreenUtil().setWidth(500),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: !logged?Color(0xff52C76E):Color(0xffC82959)
+                    ),
+                    child: Padding(
+                      padding:  EdgeInsets.all(ScreenUtil().setSp(40)),
+                      child: CustomText(text: !logged?'Login':'Logout',size: ScreenUtil().setSp(70),),
+                    ),
                   ),
+                ),
+              ),
+
+              ///last logged time
+              Visibility(
+                visible: !logged,
+                child: Center(
                   child: Padding(
-                    padding:  EdgeInsets.all(ScreenUtil().setSp(40)),
-                    child: CustomText(text: !logged?'Login':'Logout',size: ScreenUtil().setSp(70),),
+                    padding: EdgeInsets.all(ScreenUtil().setWidth(30)),
+                    child: CustomText(text: 'Last logged time - $lastTime',size: ScreenUtil().setSp(35),),
                   ),
                 ),
               ),
-            ),
 
-            Visibility(
-              visible: !logged,
-              child: Center(
-                child: Padding(
-                  padding: EdgeInsets.all(ScreenUtil().setWidth(30)),
-                  child: CustomText(text: 'Last logged time - $lastTime',size: ScreenUtil().setSp(35),),
+
+              ///locations
+              SizedBox(height: ScreenUtil().setHeight(40),),
+              Center(
+                child: Container(
+                  width: ScreenUtil().setWidth(250),
+                  child: ImageButton(
+                    color: Color(0xffC4C4C4),
+                    image: 'location.png',
+                    text: 'Locations',
+                    onclick: (){
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (context) => Locations(email: widget.companyEmail,)),
+                      );
+                    },
+                    textColor: Colors.black,
+                  ),
                 ),
-              ),
-            ),
-          ],
+              )
+
+
+            ],
+          ),
         ),
       ),
 
