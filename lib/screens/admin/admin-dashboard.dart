@@ -459,7 +459,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                     String email = profiles[i]['email'];
                                     bool logged = profiles[i]['logged'];
                                     Color dotColor;
-                                    DateTime loginTime = DateTime.parse(profiles[i]['timestamp']);
+                                    String fetchedTime = profiles[i]['timestamp'];
+                                    String lastChar = fetchedTime.substring(fetchedTime.length - 1);
+                                    DateTime loginTime;
+                                    if(lastChar=='Z'){
+                                      loginTime = DateTime.parse(fetchedTime.substring(0, fetchedTime.length-1));
+                                    }
+                                    else{
+                                      loginTime = DateTime.parse(profiles[i]['timestamp']);
+                                    }
+
                                     DateTime now = DateTime.now();
                                     var durInMins =  now.difference(loginTime).inMinutes;
                                     if(durInMins>480){
