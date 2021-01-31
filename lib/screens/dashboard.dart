@@ -51,10 +51,12 @@ class _DashBoardState extends State<DashBoard> {
   bool isForeman;
   String lastTime;
   double distance;
-
+  String nextLogoutTime = '00:00';
+  int index=0;
   int totalMins;
   int budgeted;
   String dueDate;
+  bool isShowStayLoggedin = false;
 
   getLocation() async {
     getDate();
@@ -71,6 +73,26 @@ class _DashBoardState extends State<DashBoard> {
       // date = DateFormat('MM/dd/yyyy').format(now.toUtc().subtract(Duration(hours: 7)));
       date = DateFormat('MM/dd/yyyy').format(DateTime.now());
     });
+  }
+
+  getStayTunedIn() async {
+    var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
+    var details = sub.docs;
+    String timestamp = details[0]['timestamp'];
+
+    var sub2 = await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').where('timestamp',isEqualTo: timestamp).get();
+    var logDetail = sub2.docs;
+    index = logDetail[0]['index'];
+    DateTime loginTime = DateTime.parse(logDetail[0]['timestamp']);
+    nextLogoutTime = DateFormat('HH:mm a').format(loginTime.add(Duration(minutes: 5*index)));
+    DateTime nextShowingTime = loginTime.add(Duration(minutes: 3*index));
+    if(DateTime.now().isAfter(nextShowingTime)){
+      isShowStayLoggedin = true;
+    }
+    else{
+      isShowStayLoggedin = false;
+    }
+    setState(() {});
   }
 
   getWorkingSites() async {
@@ -432,7 +454,7 @@ class _DashBoardState extends State<DashBoard> {
       }
     });
     print(widget.name+widget.id+widget.code+widget.email+widget.companyName+widget.deviceID+widget.lastTime+widget.isLogged.toString());
-
+    getStayTunedIn();
   }
 
   @override
@@ -527,9 +549,9 @@ class _DashBoardState extends State<DashBoard> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           ///location
-                          CustomText(text: location,size: ScreenUtil().setSp(40)),
+                          CustomText(text: location!=null?location:'',size: ScreenUtil().setSp(40)),
                           ///date
-                          CustomText(text: date,size: ScreenUtil().setSp(40)),
+                          CustomText(text: date!=null?date:'',size: ScreenUtil().setSp(40)),
                         ],
                       ),
                       SizedBox(height: ScreenUtil().setHeight(25),),
@@ -539,7 +561,7 @@ class _DashBoardState extends State<DashBoard> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           CustomText(text: 'Due Date:',size: ScreenUtil().setSp(30),),
-                          CustomText(text: dueDate??'n/a',size: ScreenUtil().setSp(30),),
+                          CustomText(text: dueDate!=null?dueDate:'n/a',size: ScreenUtil().setSp(30),),
                         ],
                       ),
                       SizedBox(height: ScreenUtil().setHeight(10),),
@@ -549,7 +571,7 @@ class _DashBoardState extends State<DashBoard> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           CustomText(text: 'Projected Completion:',size: ScreenUtil().setSp(30),),
-                          CustomText(text: (totalMins/budgeted*100).toStringAsFixed(2)+"%",size: ScreenUtil().setSp(30),),
+                          CustomText(text: budgeted!=null?(totalMins/budgeted*100).toStringAsFixed(2)+"%":"0.0%",size: ScreenUtil().setSp(30),),
                         ],
                       ),
                       SizedBox(height: ScreenUtil().setHeight(10),),
@@ -656,6 +678,7 @@ class _DashBoardState extends State<DashBoard> {
                   ),
                 ),
               ),
+              if(!logged)
               SizedBox(height: ScreenUtil().setHeight(40),),
 
 
@@ -685,7 +708,49 @@ class _DashBoardState extends State<DashBoard> {
                 ),
               ),
               if(logged)
-              SizedBox(height: ScreenUtil().setHeight(40),),
+              SizedBox(height: ScreenUtil().setHeight(30),),
+
+              ///stay logged in
+              if(isShowStayLoggedin)
+              Visibility(
+                visible: logged,
+                child: Center(
+                  child: GestureDetector(
+                    onTap: ()=>getStayTunedIn(),
+                    child: Container(
+                      width: ScreenUtil().setWidth(500),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Color(0xffE56F2C)
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.all(ScreenUtil().setSp(20)),
+                        child: Column(
+                          children: [
+                            BlinkText(
+                              'You will be logged out at $nextLogoutTime',
+                              style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(25)),
+                              beginColor: Colors.white,
+                              endColor: Color(0xffE56F2C),
+                              duration: Duration(milliseconds: 600),
+                            ),
+                            SizedBox(height: ScreenUtil().setHeight(10),),
+                            BlinkText(
+                              'STAY LOGGED IN',
+                              style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(40)),
+                              beginColor: Colors.white,
+                              endColor: Color(0xffE56F2C),
+                              duration: Duration(milliseconds: 600),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              if(logged&&isShowStayLoggedin)
+              SizedBox(height: ScreenUtil().setHeight(30),),
 
 
               ///log button
