@@ -198,35 +198,85 @@ class _UserAnalyticsState extends State<UserAnalytics> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.all(ScreenUtil().setWidth(40)),
-            child: Row(
-              children: [
-                Icon(Icons.account_circle_outlined,color: Colors.white,size: 35,),
-                SizedBox(width: ScreenUtil().setWidth(20),),
-                Flexible(
-                    child: CustomText(text: widget.name,size: ScreenUtil().setSp(50),)),
-              ],
-            ),
-          ),
-          Padding(
-            padding:  EdgeInsets.only(left: ScreenUtil().setWidth(40)),
+            padding: EdgeInsets.all(ScreenUtil().setWidth(30)),
             child: Container(
               decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40)
+                color: Color(0xff4B294E),
+                borderRadius: BorderRadius.circular(10)
               ),
-              child: Padding(
-                padding: EdgeInsets.all(ScreenUtil().setHeight(15)),
-                child: CustomText(text: logged?'Logged In':'Logged Out',color: logged?Colors.green:Colors.red,size: ScreenUtil().setSp(30),),
-              ),
-            ),
-          ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
 
-          Visibility(
-            visible: logged,
-            child: Padding(
-              padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-              child: Button(text: 'Logout User',color: Colors.red,onclick: ()=>logOutUser()),
+                  ///name and status
+                  Padding(
+                    padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
+                    child: Row(
+                      children: [
+                        ///name
+                        Expanded(
+                            child: SizedBox(child: CustomText(text: widget.name,size: ScreenUtil().setSp(50),align: TextAlign.start,))
+                        ),
+
+                        ///status
+                        Padding(
+                          padding:  EdgeInsets.only(left: ScreenUtil().setWidth(40)),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(40)
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(ScreenUtil().setHeight(15)),
+                              child: CustomText(text: logged?'Logged In':'Logged Out',color: logged?Colors.green:Colors.red,size: ScreenUtil().setSp(30),),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  ///logout button
+                  Visibility(
+                    visible: logged,
+                    child: Padding(
+                      padding:  EdgeInsets.symmetric(horizontal:ScreenUtil().setHeight(100)),
+                      child: Button(text: 'Logout User',borderRadius: 10,color: Colors.red,onclick: ()=>logOutUser()),
+                    ),
+                  ),
+
+                  ///date and location
+                  if(logged)
+                  Padding(
+                    padding: EdgeInsets.all(ScreenUtil().setWidth(20)),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        CustomText(text: logs[0]['date'],size: ScreenUtil().setSp(35),),
+                        CustomText(text: logs[0]['location'],size: ScreenUtil().setSp(35),),
+                      ],
+                    ),
+                  ),
+                  if(logged)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(ScreenUtil().setWidth(20),0,ScreenUtil().setWidth(20),ScreenUtil().setWidth(10)),
+                    child: CustomText(text: 'Login Time: ${logs[0]['login']}',align: TextAlign.start,),
+                  ),
+                  if(logged)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(ScreenUtil().setWidth(20),0,ScreenUtil().setWidth(20),ScreenUtil().setWidth(10)),
+                    child: CustomText(text: 'Login Longitude: ${logs[0]['loginLong']}',align: TextAlign.start,),
+                  ),
+                  if(logged)
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(ScreenUtil().setWidth(20),0,ScreenUtil().setWidth(20),ScreenUtil().setWidth(30)),
+                    child: CustomText(text: 'Login Latitude: ${logs[0]['loginLat']}',align: TextAlign.start,),
+                  ),
+
+
+
+
+                ],
+              ),
             ),
           ),
 
@@ -263,7 +313,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Color(0xff99A8B2),
+                        color: Theme.of(context).primaryColor,
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Padding(
@@ -271,254 +321,241 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                         child: Column(
                           children: [
                             ///date
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today,size: 25,),
-                                SizedBox(width: ScreenUtil().setWidth(20),),
-                                CustomText(text: date,size: ScreenUtil().setSp(35),color: Colors.black,),
-
-                              ],
-                            ),
+                            CustomText(text: date,size: ScreenUtil().setSp(40)),
                             SizedBox(height: ScreenUtil().setHeight(20),),
 
-                            ///blueBox
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).accentColor,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ///login andd logout time
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffc4c4c4),
-                                              borderRadius: BorderRadius.only(topLeft: Radius.circular(10)),
-                                              border: Border.all(color: Colors.white,width: 3)
-                                          ),
-                                          child: Padding(
-                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                            child: Row(
-                                              children: [
-                                                CustomText(text: 'Login:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                SizedBox(width: ScreenUtil().setWidth(10),),
-                                                Expanded(
-                                                  child: TextField(
-                                                    controller: loginEdit,
-                                                    cursorColor: Colors.black,
-                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                    decoration: InputDecoration(
-                                                      hintText: '00:00',
-                                                      enabledBorder:InputBorder.none,
-                                                      focusedBorder: InputBorder.none,
-                                                    ),
-                                                    onSubmitted: (x) async {
-                                                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                        'login': x,
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Color(0xffc4c4c4),
-                                              borderRadius: BorderRadius.only(topRight: Radius.circular(10)),
-                                              border: Border.all(color: Colors.white,width: 3)
-                                          ),
-                                          child: Padding(
-                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                            child: Row(
-                                              children: [
-                                                CustomText(text: 'Logout:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                SizedBox(width: ScreenUtil().setWidth(10),),
-                                                Expanded(
-                                                  child: TextField(
-                                                    controller: logoutEdit,
-                                                    cursorColor: Colors.black,
-                                                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                    decoration: InputDecoration(
-                                                      hintText: '00:00',
-                                                      enabledBorder:InputBorder.none,
-                                                      focusedBorder: InputBorder.none,
-                                                    ),
-                                                    onSubmitted: (x) async {
-                                                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                        'logout': x,
-                                                      });
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  ///lat and long
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context).accentColor,
-                                              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10)),
-                                              border: Border.all(color: Colors.white,width: 3)
-                                          ),
-                                          child: Padding(
-                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    CustomText(text: 'Lat:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                    SizedBox(width: ScreenUtil().setWidth(10),),
-                                                    Expanded(
-                                                      child: TextField(
-                                                        controller: loginLatEdit,
-                                                        cursorColor: Colors.black,
-                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                        decoration: InputDecoration(
-                                                          hintText: 'n/a',
-                                                          enabledBorder:InputBorder.none,
-                                                          focusedBorder: InputBorder.none,
-                                                        ),
-                                                        onSubmitted: (x) async {
-                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'loginLat': x,
-                                                          });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    CustomText(text: 'Long:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                    SizedBox(width: ScreenUtil().setWidth(10),),
-                                                    Expanded(
-                                                      child: TextField(
-                                                        controller: loginLongEdit,
-                                                        cursorColor: Colors.black,
-                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                        decoration: InputDecoration(
-                                                          hintText: 'n/a',
-                                                          enabledBorder:InputBorder.none,
-                                                          focusedBorder: InputBorder.none,
-                                                        ),
-                                                        onSubmitted: (x) async {
-                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'loginLong': x,
-                                                          });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                              color: Theme.of(context).accentColor,
-                                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(10)),
-                                              border: Border.all(color: Colors.white,width: 3)
-                                          ),
-                                          child: Padding(
-                                            padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
-                                            child: Column(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    CustomText(text: 'Lat:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                    SizedBox(width: ScreenUtil().setWidth(10),),
-                                                    Expanded(
-                                                      child: TextField(
-                                                        controller: logoutLatEdit,
-                                                        cursorColor: Colors.black,
-                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                        decoration: InputDecoration(
-                                                          hintText: 'n/a',
-                                                          enabledBorder:InputBorder.none,
-                                                          focusedBorder: InputBorder.none,
-                                                        ),
-                                                        onSubmitted: (x) async {
-                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'logoutLat': x,
-                                                          });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                                Row(
-                                                  children: [
-                                                    CustomText(text: 'Long:-',size: ScreenUtil().setSp(30),color: Colors.black,),
-                                                    SizedBox(width: ScreenUtil().setWidth(10),),
-                                                    Expanded(
-                                                      child: TextField(
-                                                        controller: logoutLongEdit,
-                                                        cursorColor: Colors.black,
-                                                        style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30)),
-                                                        decoration: InputDecoration(
-                                                          hintText: 'n/a',
-                                                          enabledBorder:InputBorder.none,
-                                                          focusedBorder: InputBorder.none,
-                                                        ),
-                                                        onSubmitted: (x) async {
-                                                          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
-                                                            'logoutLong': x,
-                                                          });
-                                                        },
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                            ///location
+                            CustomText(text: location,size: ScreenUtil().setSp(35)),
 
-                                  SizedBox(height: ScreenUtil().setHeight(25),),
-                                  ///location
-                                  Padding(
-                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
-                                    child: CustomText(text: 'Location : $location',size: ScreenUtil().setSp(35),color: Colors.black,),
+                            ///login time
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Login Time:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: loginEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: '00:00',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'login': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(height: ScreenUtil().setHeight(45),),
-                                  ///workedTime
-                                  Padding(
-                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(28)),
-                                    child: CustomText(text: 'Worked Time : $worked',size: ScreenUtil().setSp(35),color: Colors.black,),
+                                ),
+                              ],
+                            ),
+
+                            ///login long
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Login Longitude:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: loginLongEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: 'n/a',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'loginLong': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  SizedBox(height: ScreenUtil().setHeight(30),)
+                                ),
+                              ],
+                            ),
+
+                            ///login lat
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Login Latitude:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: loginLatEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: 'n/a',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'loginLat': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            ///logout time
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Logout Time:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: logoutEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: '00:00',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'logout': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            ///logout long
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Logout Longitude:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: logoutLongEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: 'n/a',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'logoutLong': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            ///logout lat
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Padding(
+                                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(15)),
+                                    child: Row(
+                                      children: [
+                                        CustomText(text: 'Logout Latitude:',size: ScreenUtil().setSp(30),),
+                                        SizedBox(width: ScreenUtil().setWidth(10),),
+                                        Expanded(
+                                          child: TextField(
+                                            controller: logoutLatEdit,
+                                            cursorColor: Colors.white,
+                                            textAlign: TextAlign.end,
+                                            style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
+                                            decoration: InputDecoration(
+                                              hintText: 'n/a',
+                                              enabledBorder:InputBorder.none,
+                                              focusedBorder: InputBorder.none,
+                                            ),
+                                            onSubmitted: (x) async {
+                                              await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(logs[i].id).update({
+                                                'logoutLat': x,
+                                              });
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            ///time
+                            SizedBox(height: ScreenUtil().setHeight(10),),
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Total Time:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: worked,size: ScreenUtil().setSp(30),),
                                 ],
                               ),
                             ),
-
-                            ///NoteText
-                            SizedBox(height: ScreenUtil().setHeight(20),),
-                            Align(
-                                alignment: Alignment.topLeft,
-                                child: CustomText(text: 'Note',size: ScreenUtil().setSp(40),color: Colors.black,)),
+                            SizedBox(height: ScreenUtil().setHeight(10),),
 
                             ///Note
                             SizedBox(height: ScreenUtil().setHeight(20),),

@@ -1,9 +1,12 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
+import 'package:skytech/constants.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/toast.dart';
@@ -20,109 +23,183 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   TextEditingController newLocation = TextEditingController();
-  TextEditingController lat = TextEditingController();
-  TextEditingController long = TextEditingController();
+  TextEditingController latController = TextEditingController();
+  TextEditingController longController = TextEditingController();
+  TextEditingController budgetedHoursControllers = TextEditingController();
+  String date = 'Pick the Due Date';
 
-  popUpCard(BuildContext context) async {
+  popUpCard(BuildContext context,String type) async {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          backgroundColor: Colors.white,
-          title: CustomText(text: 'Add new Location',align: TextAlign.center,color: Colors.black,),
-          content: Container(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    cursorColor: Colors.black,
-                    decoration: InputDecoration(
-                      hintText: 'Enter New Location',
-                      enabledBorder:UnderlineInputBorder(
+        return StatefulBuilder(builder: (context, StateSetter setState){
+          return AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            backgroundColor: Colors.white,
+            title: CustomText(text: type=='insert'?'Add new Location':'Update Location',align: TextAlign.center,color: Colors.black,),
+            content: Container(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ///name
+                    TextField(
+                      cursorColor: Colors.black,
+                      decoration: InputDecoration(
+                        hintText: 'Enter New Location',
+                        enabledBorder:UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
+                        ),
+                        focusedBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: Colors.black, width: 5),
+                        ),
                       ),
+                      controller: newLocation,
                     ),
-                    controller: newLocation,
-                  ),
-                  SizedBox(height: 20,),
-                  TextField(
-                    cursorColor: Colors.black,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Lat',
-                      enabledBorder:UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 5),
-                      ),
-                    ),
-                    controller: lat,
-                  ),
-                  SizedBox(height: 20,),
-                  TextField(
-                    cursorColor: Colors.black,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Long',
-                      enabledBorder:UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
-                      focusedBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black, width: 5),
-                      ),
-                    ),
-                    controller: long,
-                  ),
-                  SizedBox(height: 20,),
-                  Padding(
-                    padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
-                    child: Button(text: 'Fetch',color: Colors.amber,onclick: () async {
-                      Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
-                      setState(() {
-                        lat.text = position.latitude.toString();
-                        long.text = position.longitude.toString();
-                      });
-                    }),
-                  ),
-                  Padding(
-                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                    child: Button(text: 'Add',color: Colors.red,onclick: () async {
-                      if(newLocation.text.isNotEmpty && lat.text.isNotEmpty && long.text.isNotEmpty){
-                        locationList.add(newLocation.text);
-                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
-                          'sites': locationList
-                        });
-                        await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(newLocation.text).set(
-                            {
-                              'site': newLocation.text,
-                              'lat': double.parse(lat.text),
-                              'long': double.parse(long.text),
-                              'total': 0
-                            }
-                        );
-                        lat.clear();
-                        long.clear();
-                        newLocation.clear();
-                        Navigator.pop(context);
-                      }
-                      else{
-                        ToastBar(text: "Please fill all the fields",color: Colors.red).show();
-                      }
+                    SizedBox(height: 20,),
 
-                    }),
-                  ),
-                ],
+                    ///latitude
+                    TextField(
+                      cursorColor: Colors.black,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Lat',
+                        enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                        ),
+                      ),
+                      controller: latController,
+                    ),
+                    SizedBox(height: 20,),
+
+                    ///longitude
+                    TextField(
+                      cursorColor: Colors.black,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Long',
+                        enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                        ),
+                      ),
+                      controller: longController,
+                    ),
+                    SizedBox(height: 20,),
+
+                    ///budgeted hours
+                    TextField(
+                      cursorColor: Colors.black,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Budgeted Hours',
+                        enabledBorder:UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 2),
+                        ),
+                        focusedBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black, width: 5),
+                        ),
+                      ),
+                      controller: budgetedHoursControllers,
+                    ),
+                    SizedBox(height: 20,),
+
+                    Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
+                      child: Button(text: date,color: Constants.kButtonBlue,onclick: () async {
+                        showCupertinoModalPopup(
+                            context: context,
+                            builder: (_) => Container(
+                              height: MediaQuery.of(context).size.height/2,
+                              child: CupertinoDatePicker(
+                                onDateTimeChanged: (x){
+                                  setState(() {
+                                    date = DateFormat('MM/dd/yyyy').format(x);
+                                  });
+                                },
+                                mode: CupertinoDatePickerMode.date,
+                                backgroundColor: Colors.white,
+                              ),
+                            ));
+                      }),
+                    ),
+
+
+                    Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(40)),
+                      child: Button(text: 'Fetch',color: Colors.amber,onclick: () async {
+                        Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+                        setState(() {
+                          latController.text = position.latitude.toString();
+                          longController.text = position.longitude.toString();
+                        });
+                      }),
+                    ),
+                    Padding(
+                      padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
+                      child: Button(text: type=='insert'?'Add':'Update',color: Colors.red,onclick: () async {
+                        if(newLocation.text.isNotEmpty && latController.text.isNotEmpty && longController.text.isNotEmpty && budgetedHoursControllers.text.isNotEmpty && date!='Pick the Due Date'){
+                          if(type=='insert'){
+                            locationList.add(newLocation.text);
+                            await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
+                              'sites': locationList
+                            });
+                            await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(newLocation.text).set(
+                                {
+                                  'site': newLocation.text,
+                                  'lat': double.parse(latController.text),
+                                  'long': double.parse(longController.text),
+                                  'budgeted': double.parse(budgetedHoursControllers.text),
+                                  'dueDate': date,
+                                  'total': 0
+                                }
+                            );
+                            latController.clear();
+                            longController.clear();
+                            newLocation.clear();
+                            Navigator.pop(context);
+                          }
+                          else{
+                            if(!locationList.contains(newLocation.text)){
+                              locationList.add(newLocation.text);
+                              await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
+                                'sites': locationList
+                              });
+                            }
+                            await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(newLocation.text).update(
+                                {
+                                  'site': newLocation.text,
+                                  'lat': double.parse(latController.text),
+                                  'long': double.parse(longController.text),
+                                  'budgeted': int.parse(budgetedHoursControllers.text)*60,
+                                  'dueDate': date,
+                                }
+                            );
+
+                            latController.clear();
+                            longController.clear();
+                            newLocation.clear();
+                            Navigator.pop(context);
+                          }
+                        }
+                        else{
+                          ToastBar(text: "Please fill all the fields",color: Colors.red).show();
+                        }
+
+                      }),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        );
-      },
+          );
+        });
+        },
     );
   }
 
@@ -170,9 +247,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: ()=>popUpCard(context),
+        onPressed: ()=>popUpCard(context,'insert'),
         child: Icon(Icons.add),
-        backgroundColor: Theme.of(context).accentColor,
+        backgroundColor: Constants.kButtonBlue,
         elevation: 9,
 
       ),
@@ -189,12 +266,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).accentColor,
                   borderRadius: BorderRadius.circular(10)
               ),
               child: Padding(
                 padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                child: CustomText(text: widget.code,color: Colors.black,size: ScreenUtil().setSp(30),),
+                child: CustomText(text: widget.code,size: ScreenUtil().setSp(30),),
               ),
             ),
 
@@ -221,60 +298,133 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 itemBuilder: (context,i){
                   String location = workSitesList[i]['site'];
                   String hours = durationToString(workSitesList[i]['total']);
+                  String lat = workSitesList[i]['lat'].toString();
+                  String long = workSitesList[i]['long'].toString();
+                  String dueDate = workSitesList[i]['dueDate'].toString();
+                  String budgeted = (workSitesList[i]['budgeted']/60).toString();
+
                   return Padding(
-                    key: UniqueKey(),
-                    padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(25)),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10)
+                    padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor,
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Padding(
+                        padding:  EdgeInsets.all(ScreenUtil().setHeight(25)),
+                        child: Column(
+                          children: [
+
+                            ///location
+                            CustomText(text: location,size: ScreenUtil().setSp(35)),
+
+                            ///due date
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Due Date:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: dueDate,size: ScreenUtil().setSp(30),),
+                                ],
+                              ),
                             ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                            ///budgeted hours
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Budgeted Hours:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: budgeted,size: ScreenUtil().setSp(30),),
+                                ],
+                              ),
+                            ),
+
+                            ///accumulated hours
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Accumulated Hours:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: hours+' H',size: ScreenUtil().setSp(30),),
+                                ],
+                              ),
+                            ),
+
+                            ///latitude
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Latitude:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: lat,size: ScreenUtil().setSp(30),),
+                                ],
+                              ),
+                            ),
+
+                            ///longitude
+                            Padding(
+                              padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  CustomText(text: 'Longitude:',size: ScreenUtil().setSp(30),),
+                                  CustomText(text: long,size: ScreenUtil().setSp(30),),
+                                ],
+                              ),
+                            ),
+
+
+                            ///buttons
+                            Row(
                               children: [
-                                Flexible(
+                                Expanded(
                                   child: Padding(
                                     padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                                    child: CustomText(text: location,color: Colors.black,size: ScreenUtil().setSp(30),),
-                                  ),
-                                ),
-                                IconButton(icon: Icon(Icons.delete), onPressed: () async {
+                                    child: Button(
+                                      text: 'Delete',
+                                      color: Colors.red,
+                                      onclick: () async {
                                         locationList.remove(location);
                                         await FirebaseFirestore.instance.collection('admin').doc(widget.email).update({
                                           'sites': locationList
                                         });
                                         await FirebaseFirestore.instance.collection('admin').doc(widget.email).collection('sites').doc(location).delete();
-                                })
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
+                                    child: Button(
+                                      text: 'Edit',
+                                      color: Colors.green,
+                                      onclick: (){
+                                        newLocation.text = location;
+                                        latController.text = lat;
+                                        longController.text = long;
+                                        budgetedHoursControllers.text = budgeted;
+                                        date=dueDate;
+                                        popUpCard(context,'update');
+                                      },
+                                    ),
+                                  ),
+                                ),
                               ],
                             ),
-                          ),
+
+                          ],
                         ),
-                        SizedBox(width: ScreenUtil().setWidth(20),),
-                        Expanded(
-                          flex: 1,
-                          child: Container(
-                            height: ScreenUtil().setHeight(95),
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10)
-                            ),
-                            child: Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
-                                child: CustomText(text: '$hours H',color: Colors.black,size: ScreenUtil().setSp(30),),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   );
-                },
+
+                  },
               ):Center(child: CircularProgressIndicator()),
             )
           ],

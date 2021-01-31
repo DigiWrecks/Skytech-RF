@@ -10,10 +10,13 @@ import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:skytech/constants.dart';
+import 'package:skytech/screens/admin/locations.dart';
 import 'package:skytech/screens/admin/settings.dart';
 import 'package:skytech/screens/admin/user-analytics.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
+import 'package:skytech/widgets/image-button.dart';
 import 'package:skytech/widgets/toast.dart';
 
 class AdminDashboard extends StatefulWidget {
@@ -34,13 +37,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
   String sorting;
   List<DropdownMenuItem<String>> workingSiteList = [];
   int totalMins = 0;
-  String totalHours = '0';
-
-  String durationToString(int minutes) {
-    var d = Duration(minutes: minutes);
-    List<String> parts = d.toString().split(':');
-    return '${parts[0].padLeft(2, '0')}:${parts[1].padLeft(2, '0')}';
-  }
 
   getWorkingSites() async {
     var sub = await FirebaseFirestore.instance
@@ -71,9 +67,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         );
       });
     }
-    setState(() {
-      totalHours = durationToString(totalMins);
-    });
   }
 
   exportCsv() async {
@@ -100,7 +93,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
     // DateTime time = await NTP.now();
     // DateTime now = time.toUtc().subtract(Duration(hours: 7));
     DateTime now = DateTime.now();
-    var start = DateFormat('MM/dd/yyyy').format(now.subtract(Duration(days: now.weekday -1)));
+    var start = DateFormat('MM/dd/yyyy').format((now.subtract(Duration(days: now.weekday -1))).subtract(Duration(days: 7)));
     var end = DateFormat('MM/dd/yyyy').format(now.add(Duration(days: DateTime.daysPerWeek - now.weekday)));
     print("Start "+start.toString());
     print("End "+end.toString());
@@ -301,7 +294,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                     size: ScreenUtil().setSp(40),
                     align: TextAlign.start,
                     isBold: false,
-                    color: Color(0xffE6D5B8),
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -311,11 +304,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                 child: Padding(
                   padding: EdgeInsets.symmetric(
                       horizontal: ScreenUtil().setWidth(40)),
-                  child: Button(
-                    color: Colors.white,
+                  child: ImageButton(
+                    color: Color(0xffC4C4C4),
+                    image: 'export.png',
                     text: 'Export CSV',
                     onclick: () => exportCsv(),
-                    textColor: Colors.green,
+                    textColor: Colors.black,
                   ),
                 ),
               )
@@ -333,17 +327,18 @@ class _AdminDashboardState extends State<AdminDashboard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
-                  height: ScreenUtil().setHeight(90),
+                  height: ScreenUtil().setHeight(70),
                   decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Color(0xff99A8B2),
-                      border: Border.all(color: Colors.white, width: 3)),
+                      borderRadius: BorderRadius.circular(40),
+                      color: Constants.kDropdownGrey,
+                      border: Border.all(color: Colors.white, width: 2)),
                   child: Padding(
                     padding: EdgeInsets.symmetric(
                         horizontal: ScreenUtil().setWidth(16)),
                     child: DropdownButton(
+                      iconEnabledColor: Colors.black,
                       underline: Divider(
-                        color: Color(0xff99A8B2),
+                        color: Constants.kDropdownGrey,
                         height: 0,
                         thickness: 0,
                       ),
@@ -359,29 +354,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   ),
                 ),
 
-                ///totalHours
+                ///locations
                 Container(
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
-                      color: Color(0xff99A8B2),
-                      border: Border.all(color: Colors.white, width: 3)),
-                  child: Padding(
-                    padding: EdgeInsets.all(ScreenUtil().setWidth(15)),
-                    child: Column(
-                      children: [
-                        CustomText(
-                          text: '$totalHours H',
-                          size: ScreenUtil().setSp(35),
-                          color: Colors.black,
-                        ),
-                        CustomText(
-                          text: 'Total Working Time',
-                          isBold: false,
-                          size: ScreenUtil().setSp(25),
-                          color: Colors.black,
-                        ),
-                      ],
-                    ),
+                  width: ScreenUtil().setWidth(240),
+                  child: ImageButton(
+                    color: Color(0xffC4C4C4),
+                    image: 'location.png',
+                    text: 'Locations',
+                    onclick: (){
+                      Navigator.push(
+                        context,
+                        CupertinoPageRoute(builder: (context) => Locations(email: widget.email,)),
+                      );
+                    },
+                    textColor: Colors.black,
                   ),
                 )
               ],
@@ -398,7 +384,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                    color: Color(0xff99A8B2),
+                    color: Theme.of(context).primaryColor,
                     borderRadius: BorderRadius.circular(10)),
                 child: Padding(
                   padding: EdgeInsets.all(ScreenUtil().setHeight(20)),
@@ -415,29 +401,32 @@ class _AdminDashboardState extends State<AdminDashboard> {
                             height: ScreenUtil().setHeight(70),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(40),
-                                color: Colors.black,
+                                color: Constants.kDropdownGrey,
                                 border:
-                                    Border.all(color: Colors.white, width: 3)),
+                                    Border.all(color: Colors.white, width: 2)),
                             child: Padding(
                               padding: EdgeInsets.symmetric(
                                   horizontal: ScreenUtil().setWidth(20)),
                               child: DropdownButton(
                                 underline: Divider(
-                                  color: Colors.black,
+                                  color: Constants.kDropdownGrey,
                                   height: 0,
                                   thickness: 0,
                                 ),
-                                dropdownColor: Colors.black,
+                                dropdownColor: Constants.kDropdownGrey,
+                                iconEnabledColor: Colors.black,
                                 items: <DropdownMenuItem>[
                                   DropdownMenuItem(
                                     child: CustomText(
                                       text: "Sort by name",
+                                      color: Colors.black,
                                     ),
                                     value: "name",
                                   ),
                                   DropdownMenuItem(
                                     child: CustomText(
                                       text: "Sort by date",
+                                      color: Colors.black,
                                     ),
                                     value: "date",
                                   ),
@@ -466,11 +455,25 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                   itemCount: profiles.length,
                                   physics: BouncingScrollPhysics(),
                                   itemBuilder: (context, i) {
-                                    String name = profiles[i]['fname'] +
-                                        ' ' +
-                                        profiles[i]['lname'];
+                                    String name = profiles[i]['fname'] + ' ' + profiles[i]['lname'];
                                     String email = profiles[i]['email'];
                                     bool logged = profiles[i]['logged'];
+                                    Color dotColor;
+                                    DateTime loginTime = DateTime.parse(profiles[i]['timestamp']);
+                                    DateTime now = DateTime.now();
+                                    var durInMins =  now.difference(loginTime).inMinutes;
+                                    if(durInMins>480){
+                                      dotColor = Colors.red;
+                                    }
+                                    else if(durInMins>465){
+                                      dotColor = Colors.orange;
+                                    }
+                                    else{
+                                      dotColor = Colors.green;
+                                    }
+
+
+
                                     return Padding(
                                       padding: EdgeInsets.only(
                                           bottom: ScreenUtil().setHeight(25)),
@@ -497,7 +500,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                               borderRadius:
                                                   BorderRadius.circular(15),
                                               border: Border.all(
-                                                  color: Colors.black,
+                                                  color: Color(0xff757575),
                                                   width: 3)),
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
@@ -516,7 +519,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                         child: CircleAvatar(
                                                           radius: 5,
                                                           backgroundColor:
-                                                              Colors.green,
+                                                              dotColor,
                                                         ),
                                                       )
                                                     : SizedBox.shrink(),
@@ -527,13 +530,13 @@ class _AdminDashboardState extends State<AdminDashboard> {
                                                             .setHeight(20)),
                                                     child: CustomText(
                                                       text: name,
-                                                      color: Colors.black,
+                                                      color: Colors.white,
                                                       size: ScreenUtil()
                                                           .setSp(35),
                                                     ),
                                                   ),
                                                 ),
-                                                Icon(Icons.arrow_forward_ios)
+                                                Icon(Icons.arrow_forward_ios,color: Colors.transparent,)
                                               ],
                                             ),
                                           ),

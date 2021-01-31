@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:skytech/constants.dart';
 import 'package:skytech/screens/admin/admin-login.dart';
 import 'package:skytech/screens/register-device.dart';
 import 'package:skytech/widgets/button.dart';
@@ -25,33 +26,32 @@ class SelectUser extends StatelessWidget {
               padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor,
-                  borderRadius: BorderRadius.circular(20)
+                    borderRadius: BorderRadius.circular(20)
                 ),
                 child: Column(
                   children: [
                     SizedBox(height: ScreenUtil().setHeight(70),),
                     Padding(
                       padding:  EdgeInsets.all(ScreenUtil().setHeight(30)),
-                      child: CustomText(text: 'Device Not Found',size: ScreenUtil().setSp(50),),
+                      child: CustomText(text: 'Device Not Found',size: ScreenUtil().setSp(50),color: Color(0xffFF9838).withOpacity(0.65),),
                     ),
                     SizedBox(height: ScreenUtil().setHeight(70),),
                     Padding(
                       padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50)),
-                      child: Button(text: 'Admin Login',color: Colors.white,textColor: Colors.black,onclick: (){
+                      child: Button(text: 'Register Device',color: Constants.kButtonBlue,borderRadius: 10,onclick: (){
                         Navigator.push(
                           context,
-                          CupertinoPageRoute(builder: (context) => AdminLogin()),
+                          CupertinoPageRoute(builder: (context) => RegisterDevice()),
                         );
                       },),
                     ),
                     SizedBox(height: ScreenUtil().setHeight(50),),
                     Padding(
                       padding:  EdgeInsets.symmetric(horizontal: ScreenUtil().setHeight(50)),
-                      child: Button(text: 'Register Device',color: Colors.white,textColor: Colors.black,onclick: (){
+                      child: Button(text: 'Admin Login',color: Constants.kButtonPink,borderRadius: 10,onclick: (){
                         Navigator.push(
                           context,
-                          CupertinoPageRoute(builder: (context) => RegisterDevice()),
+                          CupertinoPageRoute(builder: (context) => AdminLogin()),
                         );
                       },),
                     ),

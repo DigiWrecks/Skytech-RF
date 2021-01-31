@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:skytech/constants.dart';
 import 'package:skytech/widgets/button.dart';
 import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/inputfield.dart';
@@ -126,7 +127,7 @@ class _AdminRegisterState extends State<AdminRegister> {
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: ScreenUtil().setWidth(60)),
-                  child: Button(text: 'Sign Up',onclick: ()=>signUp(),),
+                  child: Button(text: 'Sign Up',borderRadius: 10,color: Constants.kButtonBlue,onclick: ()=>signUp(),),
                 ),
 
                 Center(

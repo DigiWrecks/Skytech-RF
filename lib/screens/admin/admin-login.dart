@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:skytech/constants.dart';
 import 'package:skytech/screens/admin/admin-dashboard.dart';
 import 'package:skytech/screens/admin/admin-register.dart';
 import 'package:skytech/widgets/button.dart';
@@ -72,7 +73,7 @@ class _AdminLoginState extends State<AdminLogin> {
 
                 Padding(
                   padding: EdgeInsets.symmetric(vertical: ScreenUtil().setWidth(60)),
-                  child: Button(text: 'Login',onclick: ()=>logIn(),),
+                  child: Button(text: 'Login',borderRadius: 10,color: Constants.kButtonBlue,onclick: ()=>logIn(),),
                 ),
 
                 GestureDetector(
