@@ -84,8 +84,8 @@ class _DashBoardState extends State<DashBoard> {
     var logDetail = sub2.docs;
     index = logDetail[0]['index'];
     DateTime loginTime = DateTime.parse(logDetail[0]['timestamp']);
-    nextLogoutTime = DateFormat('HH:mm a').format(loginTime.add(Duration(minutes: 5*index)));
-    DateTime nextShowingTime = loginTime.add(Duration(minutes: 3*index));
+    nextLogoutTime = DateFormat('HH:mm a').format(loginTime.add(Duration(minutes: 480*index)));
+    DateTime nextShowingTime = loginTime.add(Duration(minutes: 465*index));
     if(DateTime.now().isAfter(nextShowingTime)){
       isShowStayLoggedin = true;
     }
