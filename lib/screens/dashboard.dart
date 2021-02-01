@@ -170,12 +170,34 @@ class _DashBoardState extends State<DashBoard> {
           'logged': true,
           'timestamp': timestamp,
           'locations': locationList
-        }).then((value){
-           setState(() {
-             logged = true;
-           });
-           ToastBar(color: Colors.green,text: 'Logged in!').show();
-         });
+        }).then((value) async {
+          ///send request to server
+           var url = "http://104.236.53.211:3000/schedule";
+           var response = await http.post(
+               url,
+               headers: <String, String>{
+                 'Content-Type': 'application/json',
+               },
+               body: jsonEncode(<String,dynamic>{
+                 'location': location,
+                 'playerID': playerID,
+                 'email': widget.email,
+                 'timestamp': timestamp
+               })
+           );
+           print(response.body+response.statusCode.toString());
+           if(response.statusCode==200){
+             var body = response.body;
+             getStayTunedIn();
+             setState(() {
+               logged = true;
+             });
+             ToastBar(color: Colors.green,text: 'Logged in!').show();
+           }
+           else{
+             ToastBar(text: 'Something went wrong while sending data to server!',color: Colors.red).show();
+           }
+        });
       });
     }
     catch(e){
@@ -331,98 +353,16 @@ class _DashBoardState extends State<DashBoard> {
 
 
   notificationPopUp(String locationF) async {
+
     var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
     var details = sub.docs;
-
+    await getStayTunedIn();
     String timestamp = details[0]['timestamp'];
     await getWorkingSites();
     print('before if');
     if (location != locationF) {
       notificationLogOut(timestamp: timestamp, locationF: locationF);
       ToastBar(color: Colors.green, text: 'Logged out!').show();
-    }
-
-    ///showPopUp
-    else{
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            backgroundColor: Colors.white,
-            title: CustomText(text: 'Do you want to stay logged in?',align: TextAlign.center,color: Colors.black,),
-            content: Container(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                    child: Button(text: 'Yes',color: Colors.green,onclick: () async {
-                      ///if YES Pressed
-                      ProgressDialog pr = ProgressDialog(context);
-                      pr = ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
-                      pr.style(
-                          message: 'Please wait...',
-                          borderRadius: 10.0,
-                          backgroundColor: Colors.white,
-                          progressWidget: Center(child: CircularProgressIndicator()),
-                          elevation: 10.0,
-                          insetAnimCurve: Curves.easeInOut,
-                          messageTextStyle: TextStyle(
-                              color: Colors.black, fontSize: ScreenUtil().setSp(35), fontWeight: FontWeight.bold)
-                      );
-                      pr.show();
-
-
-                      ///update log to increse mutiplire and true the pop up
-                      await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
-                        'popUp': true,
-                        'index': FieldValue.increment(1)
-                      });
-
-                      ///get onesignalId
-                      String playerID;
-                      OneSignal.shared.getPermissionSubscriptionState().then((result) {
-                        playerID = result.subscriptionStatus.userId;
-                      });
-
-                      ///getCurrentTimestamp
-                      DateTime now = DateTime.now();
-                      String currentTimestamp = now.toString();
-
-
-                      ///add temp log
-                      await FirebaseFirestore.instance.collection('tempLogs').doc(widget.email).collection('logs').add({
-                        'lastLogin': currentTimestamp,
-                        'siteID': locationF,
-                        'playerId': playerID,
-                        'email': widget.email,
-                        'timestamp': timestamp
-                      });
-
-
-                      await pr.hide();
-                      ToastBar(text: 'Data updated!',color: Colors.green).show();
-                        Navigator.pop(context);
-
-
-                      // Timer(Duration(seconds: 5),()=>onLoginPressed(overtime: true));
-
-                    }),
-                  ),
-                  Padding(
-                    padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                    child: Button(text: 'No',color: Colors.red,onclick: (){
-                      Navigator.pop(context);
-                      isForeman?notePopUp(context):onLogoutPressed('n/a');
-                    }),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
     }
   }
 
@@ -716,7 +656,71 @@ class _DashBoardState extends State<DashBoard> {
                 visible: logged,
                 child: Center(
                   child: GestureDetector(
-                    onTap: ()=>getStayTunedIn(),
+                    onTap: ()async{
+                        ProgressDialog pr = ProgressDialog(context);
+                        pr = ProgressDialog(context,type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+                        pr.style(
+                        message: 'Please wait...',
+                        borderRadius: 10.0,
+                        backgroundColor: Colors.white,
+                        progressWidget: Center(child: CircularProgressIndicator()),
+                        elevation: 10.0,
+                        insetAnimCurve: Curves.easeInOut,
+                        messageTextStyle: TextStyle(
+                        color: Colors.black, fontSize: ScreenUtil().setSp(35), fontWeight: FontWeight.bold)
+                        );
+                        pr.show();
+
+
+                        ///get logged timestamp
+                        var sub = await FirebaseFirestore.instance.collection('user').where('email',isEqualTo: widget.email).get();
+                        var details = sub.docs;
+
+                        String timestamp = details[0]['timestamp'];
+
+                        ///update log to increse mutiplire and true the pop up
+                        await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+                        'popUp': true,
+                        'index': FieldValue.increment(1)
+                        });
+
+                        ///get onesignalId
+                        String playerID;
+                        await OneSignal.shared.getPermissionSubscriptionState().then((result) {
+                        playerID = result.subscriptionStatus.userId;
+                        });
+
+                        ///getCurrentTimestamp
+                        DateTime now = DateTime.now();
+                        String currentTimestamp = now.toString();
+
+                        ///send request to server
+                        var url = "http://104.236.53.211:3000/reschedule";
+                        var response = await http.post(
+                            url,
+                          headers: <String, String>{
+                            'Content-Type': 'application/json',
+                          },
+                          body: jsonEncode(<String,dynamic>{
+                            'lastLogin': currentTimestamp,
+                            'location': location,
+                            'playerID': playerID,
+                            'email': widget.email,
+                            'timestamp': timestamp
+                          })
+                        );
+                        print(response.body+response.statusCode.toString());
+                        if(response.statusCode==200){
+                          await pr.hide();
+                          var body = response.body;
+                          await getStayTunedIn();
+                          ToastBar(text: 'Data updated!',color: Colors.green).show();
+                        }
+                        else{
+                          await pr.hide();
+                          ToastBar(text: 'Something went wrong!',color: Colors.red).show();
+                        }
+                    },
                     child: Container(
                       width: ScreenUtil().setWidth(500),
                       decoration: BoxDecoration(
