@@ -8,6 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:ntp/ntp.dart';
@@ -449,6 +450,7 @@ class _DashBoardState extends State<DashBoard> {
                   ///refresh button
                   GestureDetector(
                     onTap: (){
+                      Vibrate.feedback(FeedbackType.medium);
                       setState(() {
                           location = "";
                       });
@@ -608,7 +610,7 @@ class _DashBoardState extends State<DashBoard> {
                     padding: EdgeInsets.symmetric(horizontal: ScreenUtil().setWidth(50)),
                     // child: CustomText(text: location!=null?location:'You are not within the work site!',size: ScreenUtil().setSp(35),),
                     child: BlinkText(
-                        location!=null?'LOCATION DETECTED $location':'LOCATION NOT FOUND',
+                        location==''?'DETECTING':location!=null?'LOCATION DETECTED\n$location':'LOCATION NOT FOUND',
                         style: TextStyle(fontSize: ScreenUtil().setSp(40),fontWeight: FontWeight.bold),
                         beginColor: location!=null?Color(0xff2CE5E5):Color(0xffE56F2C),
                         endColor: Colors.transparent,
@@ -623,6 +625,7 @@ class _DashBoardState extends State<DashBoard> {
 
 
               ///add or edit comment
+              if(!isShowStayLoggedin)
               Visibility(
                 visible: logged,
                 child: Center(
@@ -649,7 +652,6 @@ class _DashBoardState extends State<DashBoard> {
               ),
               if(logged)
               SizedBox(height: ScreenUtil().setHeight(30),),
-
               ///stay logged in
               if(isShowStayLoggedin)
               Visibility(
@@ -761,6 +763,7 @@ class _DashBoardState extends State<DashBoard> {
               Center(
                 child: GestureDetector(
                   onTap: (){
+                    Vibrate.feedback(FeedbackType.medium);
                     showDialog(
                       context: context,
                       builder: (BuildContext context){

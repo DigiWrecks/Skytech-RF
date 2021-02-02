@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
+
 import 'custom-text.dart';
 
 class Button extends StatelessWidget {
@@ -17,7 +19,10 @@ class Button extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: RaisedButton(
-        onPressed: onclick,
+        onPressed: () async {
+            Vibrate.feedback(FeedbackType.medium);
+            onclick();
+        },
         shape:RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
         ),

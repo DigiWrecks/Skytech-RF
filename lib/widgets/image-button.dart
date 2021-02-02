@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'custom-text.dart';
 
 class ImageButton extends StatelessWidget {
@@ -19,7 +20,10 @@ class ImageButton extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: RaisedButton(
-        onPressed: onclick,
+        onPressed: () async {
+          Vibrate.feedback(FeedbackType.medium);
+          onclick();
+        },
         shape:RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(borderRadius),
         ),
@@ -31,7 +35,7 @@ class ImageButton extends StatelessWidget {
                 height: ScreenUtil().setWidth(45),
                 child: Image.asset('images/$image')),
             SizedBox(width: ScreenUtil().setWidth(15),),
-            CustomText(text: text,size: 14,color: textColor,),
+            CustomText(text: text,size: ScreenUtil().setSp(23),color: textColor,),
           ],
         ),
       ),

@@ -337,7 +337,6 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                     child: Row(
                                       children: [
                                         CustomText(text: 'Login Time:',size: ScreenUtil().setSp(30),),
-                                        SizedBox(width: ScreenUtil().setWidth(10),),
                                         Expanded(
                                           child: TextField(
                                             controller: loginEdit,
@@ -346,6 +345,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: '00:00',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -382,6 +382,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: 'n/a',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -418,6 +419,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: 'n/a',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -454,6 +456,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: '00:00',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -490,6 +493,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: 'n/a',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -526,6 +530,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                                             style: TextStyle(fontWeight: FontWeight.bold,fontSize: ScreenUtil().setSp(30),color: Colors.white),
                                             decoration: InputDecoration(
                                               hintText: 'n/a',
+                                              isDense: true,
                                               enabledBorder:InputBorder.none,
                                               focusedBorder: InputBorder.none,
                                             ),
@@ -544,7 +549,7 @@ class _UserAnalyticsState extends State<UserAnalytics> {
                             ),
 
                             ///time
-                            SizedBox(height: ScreenUtil().setHeight(10),),
+
                             Padding(
                               padding:  EdgeInsets.all(ScreenUtil().setWidth(15)),
                               child: Row(
