@@ -206,7 +206,7 @@ class _DashBoardState extends State<DashBoard> {
     }
   }
 
-  onLogoutPressed(String note) async {
+  onLogoutPressed() async {
     ToastBar(color: Colors.orange,text: 'Please wait...').show();
 
     try{
@@ -218,50 +218,60 @@ class _DashBoardState extends State<DashBoard> {
 
       var sub2 = await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').where('timestamp', isEqualTo: timestamp).get();
       var locations = sub2.docs;
-      calculateDistance(sLat: double.parse(locations[0]['loginLat']),sLong: double.parse(locations[0]['loginLong']));
-     print('distance is'+distance.toString());
 
-     if(distance<123){
-       DateTime now = DateTime.now();
-       String time = DateFormat('hh:mm a').format(now);
-       var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
-       var durInHours =  now.difference(DateTime.parse(timestamp)).inHours;
-       int mins = durInMins - durInHours*60;
-       // print(durInHours.toString()+" h "+mins.toString()+" min");
-        totalMins += durInMins;
+      String notes = locations[0]['notes'];
+      logOut() async {
+        calculateDistance(sLat: double.parse(locations[0]['loginLat']),sLong: double.parse(locations[0]['loginLong']));
+        print('distance is'+distance.toString());
+
+        if(distance<123){
+          DateTime now = DateTime.now();
+          String time = DateFormat('hh:mm a').format(now);
+          var durInMins =  now.difference(DateTime.parse(timestamp)).inMinutes;
+          var durInHours =  now.difference(DateTime.parse(timestamp)).inHours;
+          int mins = durInMins - durInHours*60;
+          // print(durInHours.toString()+" h "+mins.toString()+" min");
+          totalMins += durInMins;
 
 
-       await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
-         'logout': time,
-         'logoutLat': lat,
-         'logoutLong': long,
-         'notes': note,
-         'worked': durInHours.toString()+" h "+mins.toString()+" min"
-       });
+          await FirebaseFirestore.instance.collection('logs').doc(widget.email).collection('logs').doc(timestamp).update({
+            'logout': time,
+            'logoutLat': lat,
+            'logoutLong': long,
+            'worked': durInHours.toString()+" h "+mins.toString()+" min"
+          });
 
-       await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
-         'logged': false,
-         'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
-       });
+          await FirebaseFirestore.instance.collection('user').doc(widget.email).update({
+            'logged': false,
+            'lastTime': durInHours.toString()+" h "+mins.toString()+" min"
+          });
 
-       await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').doc(location).update({
-         'total': totalMins,
-       });
+          await FirebaseFirestore.instance.collection('admin').doc(widget.companyEmail).collection('sites').doc(location).update({
+            'total': totalMins,
+          });
 
-       setState(() {
-         logged = false;
-         lastTime = durInHours.toString()+" h "+mins.toString()+" min";
-       });
-       ToastBar(color: Colors.green,text: 'Logged out!').show();
-       if(isForeman){
-         Navigator.pop(context);
-       }
+          setState(() {
+            logged = false;
+            lastTime = durInHours.toString()+" h "+mins.toString()+" min";
+          });
+          ToastBar(color: Colors.green,text: 'Logged out!').show();
+        }
+        else{
+          ToastBar(color: Colors.red,text: 'You must within the range of 350ft from your logged in location!').show();
+        }
+      }
 
-     }
-     else{
-       ToastBar(color: Colors.red,text: 'You must within the range of 350ft from your logged in location!').show();
-     }
-
+      if(isForeman){
+        if(notes.isEmpty){
+          notePopUp(context);
+        }
+        else{
+          logOut();
+        }
+      }
+      else{
+        logOut();
+      }
     }
     catch(e){
       ToastBar(color: Colors.red,text: e.toString()).show();
@@ -269,42 +279,24 @@ class _DashBoardState extends State<DashBoard> {
   }
 
   notePopUp(BuildContext context) async {
-    TextEditingController note = TextEditingController();
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: Colors.white,
-          title: CustomText(text: 'Note',align: TextAlign.center,color: Colors.black,),
+          title: CustomText(text: 'Please add a comment',align: TextAlign.center,color: Colors.black,),
           content: Container(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    hintText: 'Type your note here',
-                    enabledBorder:UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 2),
-                    ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 5),
-                    ),
-                  ),
-                  controller: note,
-                ),
-                Padding(
-                  padding:  EdgeInsets.all(ScreenUtil().setHeight(40)),
-                  child: Button(text: 'Submit',color: Colors.green,onclick: () async {
-                    if(note.text.isNotEmpty){
-                      onLogoutPressed(note.text);
-                    }
-                    else{
-                      ToastBar(text: 'Please fill the note',color: Colors.red).show();
-                    }
-                  }),
-                ),
+                Button(text: 'Go to comments',borderRadius: 10,color: Constants.kButtonBlue,onclick: () async {
+                  await Navigator.push(
+                    context,
+                    CupertinoPageRoute(builder: (context) => Comments(email: widget.email,location: location,date: date,name: widget.name,)),
+                  );
+                  Navigator.pop(context);
+                })
               ],
             ),
           ),
@@ -797,7 +789,7 @@ class _DashBoardState extends State<DashBoard> {
                                       Navigator.pop(context);
                                     }else{
                                       Navigator.pop(context);
-                                      isForeman?notePopUp(context):onLogoutPressed('n/a');
+                                      onLogoutPressed();
                                     }
                                   }
                                   else{
