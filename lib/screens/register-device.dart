@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info/device_info.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:ntp/ntp.dart';
 import 'package:skytech/constants.dart';
 import 'package:skytech/screens/dashboard.dart';
 import 'package:skytech/widgets/button.dart';

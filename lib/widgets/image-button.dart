@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
+import 'package:vibration/vibration.dart';
 import 'custom-text.dart';
 
 class ImageButton extends StatelessWidget {
@@ -21,7 +21,10 @@ class ImageButton extends StatelessWidget {
       width: double.infinity,
       child: RaisedButton(
         onPressed: () async {
-          Vibrate.feedback(FeedbackType.medium);
+          if (await Vibration.hasVibrator()) {
+            Vibration.vibrate(duration: 80);
+          }
+          // Vibrate.feedback(FeedbackType.medium);
           onclick();
         },
         shape:RoundedRectangleBorder(

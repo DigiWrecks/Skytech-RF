@@ -49,7 +49,7 @@ dependencies:
   http: ^0.12.2
   dropdown_search: ^0.4.8
   blinking_text: ^0.0.4+1
-  flutter_vibrate: ^1.0.0
+  vibration: ^1.7.3
 
 dev_dependencies:
   flutter_test:

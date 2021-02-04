@@ -1,17 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:blinking_text/blinking_text.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/screenutil.dart';
-import 'package:flutter_vibrate/flutter_vibrate.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:ntp/ntp.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:skytech/constants.dart';
@@ -21,6 +17,7 @@ import 'package:skytech/widgets/custom-text.dart';
 import 'package:skytech/widgets/image-button.dart';
 import 'package:skytech/widgets/toast.dart';
 import 'package:http/http.dart' as http;
+import 'package:vibration/vibration.dart';
 
 import 'admin/locations.dart';
 import 'comments.dart';
@@ -188,7 +185,6 @@ class _DashBoardState extends State<DashBoard> {
            );
            print(response.body+response.statusCode.toString());
            if(response.statusCode==200){
-             var body = response.body;
              getStayTunedIn();
              setState(() {
                logged = true;
@@ -441,8 +437,11 @@ class _DashBoardState extends State<DashBoard> {
 
                   ///refresh button
                   GestureDetector(
-                    onTap: (){
-                      Vibrate.feedback(FeedbackType.medium);
+                    onTap: () async {
+                      // Vibrate.feedback(FeedbackType.medium);
+                      if (await Vibration.hasVibrator()) {
+                      Vibration.vibrate(duration: 80);
+                      }
                       setState(() {
                           location = "";
                       });
@@ -706,7 +705,6 @@ class _DashBoardState extends State<DashBoard> {
                         print(response.body+response.statusCode.toString());
                         if(response.statusCode==200){
                           await pr.hide();
-                          var body = response.body;
                           await getStayTunedIn();
                           ToastBar(text: 'Data updated!',color: Colors.green).show();
                         }
@@ -754,8 +752,11 @@ class _DashBoardState extends State<DashBoard> {
               ///log button
               Center(
                 child: GestureDetector(
-                  onTap: (){
-                    Vibrate.feedback(FeedbackType.medium);
+                  onTap: () async {
+                    // Vibrate.feedback(FeedbackType.medium);
+                    if (await Vibration.hasVibrator()) {
+                    Vibration.vibrate(duration: 80);
+                    }
                     showDialog(
                       context: context,
                       builder: (BuildContext context){
