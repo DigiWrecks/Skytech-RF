@@ -276,19 +276,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             ///title of workTime and workStie
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
-                  child: CustomText(text: 'Work Sites',size: ScreenUtil().setSp(35),),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
-                  child: CustomText(text: 'Work Time',size: ScreenUtil().setSp(35),),
-                ),
-              ],
-            ),
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     Padding(
+            //       padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
+            //       child: CustomText(text: 'Work Sites',size: ScreenUtil().setSp(35),),
+            //     ),
+            //     Padding(
+            //       padding: EdgeInsets.symmetric(vertical: ScreenUtil().setHeight(35)),
+            //       child: CustomText(text: 'Work Time',size: ScreenUtil().setSp(35),),
+            //     ),
+            //   ],
+            // ),
+
+            SizedBox(height: ScreenUtil().setHeight(35),),
 
             ///listviews
             Expanded(
