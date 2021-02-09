@@ -61,7 +61,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ///latitude
                     TextField(
                       cursorColor: Colors.black,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true,signed: true),
                       decoration: InputDecoration(
                         hintText: 'Lat',
                         enabledBorder:UnderlineInputBorder(
@@ -78,7 +78,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ///longitude
                     TextField(
                       cursorColor: Colors.black,
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true,signed: true),
                       decoration: InputDecoration(
                         hintText: 'Long',
                         enabledBorder:UnderlineInputBorder(
@@ -154,7 +154,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   'site': newLocation.text,
                                   'lat': double.parse(latController.text),
                                   'long': double.parse(longController.text),
-                                  'budgeted': double.parse(budgetedHoursControllers.text),
+                                  'budgeted': int.parse(budgetedHoursControllers.text)*60,
                                   'dueDate': date,
                                   'total': 0
                                 }
@@ -301,7 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   String lat = workSitesList[i]['lat'].toString();
                   String long = workSitesList[i]['long'].toString();
                   String dueDate = workSitesList[i]['dueDate'].toString();
-                  String budgeted = (workSitesList[i]['budgeted']/60).toString();
+                  String budgeted = durationToString(workSitesList[i]['budgeted']);
 
                   return Padding(
                     padding:  EdgeInsets.only(bottom: ScreenUtil().setHeight(20)),
@@ -337,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   CustomText(text: 'Budgeted Hours:',size: ScreenUtil().setSp(30),),
-                                  CustomText(text: budgeted,size: ScreenUtil().setSp(30),),
+                                  CustomText(text: budgeted+' H',size: ScreenUtil().setSp(30),),
                                 ],
                               ),
                             ),
@@ -408,7 +408,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         newLocation.text = location;
                                         latController.text = lat;
                                         longController.text = long;
-                                        budgetedHoursControllers.text = budgeted;
+                                        budgetedHoursControllers.text = (workSitesList[i]['budgeted']/60).round().toString();
                                         date=dueDate;
                                         popUpCard(context,'update');
                                       },
